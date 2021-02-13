@@ -3,10 +3,14 @@ import user.UserChecker;
 
 import java.util.Scanner;
 
+/**
+ * @author Filip Stojakovic
+ */
 public class MainApp
 {
     public static final Scanner scanner = new Scanner(System.in);
 
+    //fun start here
     public static void main(String[] args)
     {
         Utils.clearScreen();

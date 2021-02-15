@@ -1,0 +1,4 @@
+V	210225113501Z		01	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=CA_MarkoMarkovic/CN=ca/emailAddress=ca
+V	210225113753Z		02	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=CA_MarkoMarkovic/CN=marko/emailAddress=marko
+V	210225114742Z		03	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=CA_MarkoMarkovic/CN=Filip Stojakovic/emailAddress=filip
+V	210225114849Z		04	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=CA_MarkoMarkovic/CN=aa/emailAddress=aa

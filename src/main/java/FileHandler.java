@@ -1,4 +1,5 @@
 import user.User;
+import utils.Utils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -82,19 +83,23 @@ public class FileHandler
 
     /**
      * Get user input and save content to the file
+     *
      * @param path
      */
-    public void insetFileContent(Path path)
+    public void insetFileContent(Path path) throws IOException
     {
         String content = getContentFromUser();
+        Files.write(path, content.getBytes());
+    }
 
-        try (FileWriter fileWriter = new FileWriter(path.toFile()))
-        {
-            fileWriter.write(content);
-        } catch (IOException ex)
-        {
-            ex.printStackTrace();
-        }
+    public byte[] readAllBytes(Path path) throws IOException
+    {
+        return Files.readAllBytes(path);
+    }
+
+    public void writeBytes(Path path, byte[] data) throws IOException
+    {
+        Files.write(path, data);
     }
 
     /**
@@ -106,6 +111,7 @@ public class FileHandler
     {
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
+        System.out.println("enter file content and \"exit\" for saving");
         while (!(line = MainApp.scanner.nextLine()).equals("exit"))
             stringBuilder.append(line).append("\n");
 
@@ -131,5 +137,7 @@ public class FileHandler
         }
         return true;
     }
+
+
 
 }

@@ -1,16 +1,19 @@
-import user.User;
-import utils.Utils;
+package crypto;
+
+import crypto.user.User;
+import crypto.utils.PathConsts;
+import crypto.utils.PrintUtil;
+import crypto.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 public class Command
 {
-    public static final String USER_DIR = "users" + File.separator;
-    public static final String TERMINATOR = " > ";
 
     private User user;
     private StringBuilder pathBuilder;
@@ -25,7 +28,7 @@ public class Command
     public void takeUserInputs()
     {
         Utils.clearScreen();
-        System.out.println("Welcome " + user.getUsername());
+        System.out.println("Welcome " + user.getCommonName());
         MainApp.scanner.nextLine(); // flush scanner
 
         String input = null;
@@ -33,7 +36,7 @@ public class Command
         {
             try
             {
-                System.out.print(pathBuilder.toString() + TERMINATOR);
+                PrintUtil.printColorful(pathBuilder.toString() + PathConsts.COMMAND_TERMINATOR);
                 input = MainApp.scanner.nextLine();
                 analyzeInput(input);
 
@@ -76,7 +79,11 @@ public class Command
                 break;
 
             case "ls":
-                Files.list(Paths.get(pathBuilder.toString())).forEach(x -> System.out.println(x.getFileName()));
+                var fileList = Files.list(Paths.get(pathBuilder.toString())).collect(Collectors.toList());
+                if (fileList.isEmpty())
+                    System.out.println("Empty folder");
+                else
+                    fileList.forEach(x -> System.out.println(x.getFileName()));
                 break;
 
             case "clear":
@@ -92,7 +99,7 @@ public class Command
 
     private StringBuilder newUserPathBuilder()
     {
-        return new StringBuilder(USER_DIR + user.getUsername());
+        return new StringBuilder(PathConsts.USER_DIR + user.getUsername());
     }
 
     private void isUserFolderExists()

@@ -1,11 +1,12 @@
-import user.User;
-import user.UserChecker;
-import utils.Utils;
+package crypto;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Scanner;
+
+import crypto.user.LoadUser;
+import crypto.user.User;
+import crypto.utils.Utils;
 import org.json.simple.parser.ParseException;
 
 /**
@@ -21,7 +22,8 @@ public class MainApp
         try
         {
             Utils.clearScreen();
-            User user = getUserInfo();
+            User userJSON = getUserInfo();
+            User user = new LoadUser().loadUser(userJSON);
             Command control = new Command(user);
             control.takeUserInputs();
 
@@ -35,7 +37,7 @@ public class MainApp
 
     private static User getUserInfo() throws IOException, URISyntaxException, ParseException
     {
-        UserChecker userChecker = new UserChecker();
+        crypto.user.UserChecker userChecker = new crypto.user.UserChecker();
         User user = null;
         do
         {
@@ -44,6 +46,12 @@ public class MainApp
             System.out.print("Enter password: ");
             String password = scanner.next().trim();
             user = userChecker.checkUser(username, password);
+
+            if(user ==null)
+            {
+                System.out.println("Ooops! Wrong username or password!");
+                scanner.nextLine();
+            }
 
         } while (user == null);
 

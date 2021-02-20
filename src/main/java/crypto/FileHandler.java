@@ -1,5 +1,6 @@
-import user.User;
-import utils.Utils;
+package crypto;
+
+import crypto.user.User;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -29,7 +30,7 @@ public class FileHandler
         if (!isArguemntValid(input))
             return null;
 
-        String path = currentPath + File.separator + input.split(Utils.REGEX_SPACES)[1];
+        String path = currentPath + File.separator + input.split(crypto.utils.Utils.REGEX_SPACES)[1];
         if (isFileExists(path))
         {
             System.out.println(FILE_EXISTS);
@@ -50,7 +51,7 @@ public class FileHandler
         if (!isArguemntValid(input))
             return;
 
-        String path = currentPath + File.separator + input.split(Utils.REGEX_SPACES)[1];
+        String path = currentPath + File.separator + input.split(crypto.utils.Utils.REGEX_SPACES)[1];
         if (!isFileExists(path))
         {
             System.out.println(FILE_DOES_NOT_EXIST);
@@ -72,7 +73,7 @@ public class FileHandler
         if (!isArguemntValid(input))
             return false;
 
-        String path = currentPath + File.separator + input.split(Utils.REGEX_SPACES)[1];
+        String path = currentPath + File.separator + input.split(crypto.utils.Utils.REGEX_SPACES)[1];
         if (!isFileExists(path))
         {
             System.out.println(FILE_DOES_NOT_EXIST);
@@ -82,7 +83,7 @@ public class FileHandler
     }
 
     /**
-     * Get user input and save content to the file
+     * Get cypto.user input and save content to the file
      *
      * @param path
      */
@@ -103,9 +104,9 @@ public class FileHandler
     }
 
     /**
-     * get content from user until he enters "exit"
+     * get content from cypto.user until he enters "exit"
      *
-     * @return user content
+     * @return cypto.user content
      */
     private String getContentFromUser()
     {
@@ -129,7 +130,7 @@ public class FileHandler
     //check if arguemnt when splited by space has lenght of 2
     private boolean isArguemntValid(String argument)
     {
-        var inputSplit = argument.split(Utils.REGEX_SPACES);
+        var inputSplit = argument.split(crypto.utils.Utils.REGEX_SPACES);
         if (inputSplit.length != 2)
         {
             System.out.println("invalid number of arugemnts");

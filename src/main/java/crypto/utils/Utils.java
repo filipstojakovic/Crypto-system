@@ -1,4 +1,4 @@
-package utils;
+package crypto.utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,7 +38,7 @@ public abstract class Utils
     public static File getFileFromResource(String fileName) throws URISyntaxException, FileNotFoundException
     {
 
-        ClassLoader classLoader = utils.Utils.class.getClassLoader();
+        ClassLoader classLoader = Utils.class.getClassLoader();
         URL resource = classLoader.getResource(fileName.trim());
         if (resource == null)
         {

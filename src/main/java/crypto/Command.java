@@ -1,6 +1,7 @@
 package crypto;
 
 import crypto.user.User;
+import crypto.utils.FileUtil;
 import crypto.utils.PathConsts;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
@@ -63,13 +64,17 @@ public class Command
         switch (startWith)
         {
             case "open":
-                fileHandler.openFile(input);
+                fileHandler.openFile(input); //TODO: make tmp file that is decripted and opet that file, if saved overide original
                 break;
 
             case "touch":
                 Path path = fileHandler.createFile(input);
                 if (path != null)
                     fileHandler.insetFileContent(path);
+                break;
+
+            case "cat":
+                catCommand(input);
                 break;
 
             case "rm":
@@ -95,6 +100,21 @@ public class Command
 
         }
 
+    }
+
+    private void catCommand(String input) throws IOException
+    {
+        var splited = input.split("\\s");
+        if (splited.length == 2)
+        {
+            File file = FileUtil.getFileIfExists(pathBuilder.toString() + File.separator + splited[1]);
+            if(file!=null)
+                Files.readAllLines(file.toPath()).forEach(System.out::println);
+            else
+                System.out.println("file not found");
+        }
+        else
+            System.out.println("invalid num of arguemtns");
     }
 
     private StringBuilder newUserPathBuilder()

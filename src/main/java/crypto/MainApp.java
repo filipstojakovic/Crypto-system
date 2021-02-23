@@ -1,13 +1,11 @@
 package crypto;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Scanner;
-
-import crypto.user.LoadUser;
-import crypto.user.User;
+import crypto.utils.CertificateUtil;
 import crypto.utils.Utils;
-import org.json.simple.parser.ParseException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.security.Security;
+import java.util.Scanner;
 
 /**
  * @author Filip Stojakovic
@@ -15,47 +13,54 @@ import org.json.simple.parser.ParseException;
 public class MainApp
 {
     public static final Scanner scanner = new Scanner(System.in);
+    public static final int LOGIN = 1;
+    public static final int SIGNUP = 2;
+    public static final int EXIT = 0;
 
     //fun start here
     public static void main(String[] args)
     {
-        try
-        {
-            Utils.clearScreen();
-            User userJSON = getUserInfo();
-            User user = new LoadUser().loadUser(userJSON);
-            Command control = new Command(user);
-            control.takeUserInputs();
-
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-
-        }
-        System.out.println("Bye");
-    }
-
-    private static User getUserInfo() throws IOException, URISyntaxException, ParseException
-    {
-        crypto.user.UserChecker userChecker = new crypto.user.UserChecker();
-        User user = null;
+        CertificateUtil.initRootCertificate();
+        Security.addProvider(new BouncyCastleProvider());
+        int command;
         do
         {
-            System.out.print("Enter username: ");
-            String username = scanner.next().trim();
-            System.out.print("Enter password: ");
-            String password = scanner.next().trim();
-            user = userChecker.checkUser(username, password);
-
-            if(user ==null)
+            Utils.clearScreen();
+            command = loginOrSignUp();
+            switch (command)
             {
-                System.out.println("Ooops! Wrong username or password!");
-                scanner.nextLine();
+                case LOGIN -> login();
+                case SIGNUP -> signup();
             }
 
-        } while (user == null);
+        } while (command != 0);
 
-        return user;
+        System.out.println("Bye bye");
+    }
+
+    private static int loginOrSignUp()
+    {
+        int command;
+        do
+        {
+            System.out.print("1)Login\n2)Sign up\n0)Exit\nCommand: ");
+            command = scanner.nextInt();
+
+        } while (command < 0 || command > 2);
+
+        return command;
+    }
+
+    private static void signup()
+    {
+        SignUp signUp = new SignUp();
+        signUp.handleSignUp();
+    }
+
+    private static void login()
+    {
+        Login login = new Login();
+        login.handleLogin();
     }
 
 }

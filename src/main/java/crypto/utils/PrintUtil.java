@@ -14,4 +14,9 @@ public class PrintUtil
     {
         System.out.println(ANSI_GREEN + msg + RESET);
     }
+
+    public static void printWithColor(String msg, String color)
+    {
+        System.out.println(color + msg + RESET);
+    }
 }

@@ -32,7 +32,7 @@ public class KeyPairUtil
 
     private static PrivateKey loadUserPrivateKey(String username) throws FileNotFoundException, IOException
     {
-        java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+         java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         try (PemReader pemReader = new PemReader(new FileReader((Paths.get(PathConsts.PRIVATE_KEYS_DIR + "r2.key").toFile())))) //TODO: ovdje r1 treba zamijeniti
         {
             PemObject pemObject = pemReader.readPemObject();
@@ -50,4 +50,10 @@ public class KeyPairUtil
     }
 
 
+    static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", "BC");
+        kpGen.initialize(2048, new SecureRandom());
+        return kpGen.generateKeyPair();
+    }
 }

@@ -7,6 +7,9 @@ import java.net.URL;
 
 public abstract class Utils
 {
+    public static final long DAY_IN_MILLS = 1000L * 60 * 60 * 24;
+    public static final long THIRTY_DAYS = DAY_IN_MILLS * 30;
+    public static final long YEAR_IN_MILLS = 365 * DAY_IN_MILLS;
 
     public static final int LINE_NUM = 55;
     public static final String REGEX_SPACES = "\\s";

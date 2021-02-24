@@ -2,11 +2,13 @@ package crypto.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import crypto.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -31,7 +33,7 @@ public class UserChecker
      *
      * @return null if cypto.user does not exist, cypto.user if exists (with valid username and inputPassword)
      */
-    public User checkUser(@NotNull String inputUsername, @NotNull String inputPassword) throws IOException, URISyntaxException, ParseException
+    public User checkUserExistence(@NotNull String inputUsername, @NotNull String inputPassword) throws IOException, URISyntaxException, ParseException
     {
         JSONArray userArray = getUsersJsonArray();
         User user = null;
@@ -79,8 +81,11 @@ public class UserChecker
     {
         JSONArray usersArray = null;
 
-        FileReader reader = new FileReader(crypto.utils.Utils.getFileFromResource(crypto.utils.PathConsts.USERS_JSON));
+        File userFile = Utils.getFileFromResource(crypto.utils.PathConsts.USERS_JSON);
+        if(userFile.length()==0)
+            return new JSONArray();
 
+        FileReader reader = new FileReader(userFile);
         //Read JSON file
         JSONParser jsonParser = new JSONParser();
         Object obj = jsonParser.parse(reader);

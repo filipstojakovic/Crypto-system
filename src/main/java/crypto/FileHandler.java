@@ -19,6 +19,7 @@ public class FileHandler
 
     public FileHandler(User user, String currentPath)
     {
+
         this.user = user;
         this.currentPath = currentPath;
     }

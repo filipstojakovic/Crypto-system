@@ -3,7 +3,10 @@ package crypto;
 import crypto.utils.CertificateUtil;
 import crypto.utils.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.Security;
 import java.util.Scanner;
 
@@ -20,20 +23,33 @@ public class MainApp
     //fun start here
     public static void main(String[] args)
     {
-        CertificateUtil.initRootCertificate();
-        Security.addProvider(new BouncyCastleProvider());
-        int command;
-        do
+        try
         {
-            Utils.clearScreen();
-            command = loginOrSignUp();
-            switch (command)
+            CertificateUtil.initRootCertificate();
+            Security.addProvider(new BouncyCastleProvider());
+            int command;
+            do
             {
-                case LOGIN -> login();
-                case SIGNUP -> signup();
-            }
+                Utils.clearScreen();
+                command = loginOrSignUp();
+                switch (command)
+                {
+                    case LOGIN -> login();
+                    case SIGNUP -> signup();
+                }
 
-        } while (command != 0);
+            } while (command != 0);
+
+        } catch (ParseException e)
+        {
+            e.printStackTrace();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        } catch (URISyntaxException e)
+        {
+            e.printStackTrace();
+        }
 
         System.out.println("Bye bye");
     }
@@ -51,7 +67,7 @@ public class MainApp
         return command;
     }
 
-    private static void signup()
+    private static void signup() throws ParseException, IOException, URISyntaxException
     {
         SignUp signUp = new SignUp();
         signUp.handleSignUp();

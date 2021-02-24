@@ -41,7 +41,7 @@ public class Login
             String username = scanner.next().trim();
             System.out.print("Enter password: ");
             String password = scanner.next().trim();
-            user = userChecker.checkUser(username, password);
+            user = userChecker.checkUserExistence(username, password);
 
             if (user == null)
             {

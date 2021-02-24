@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public abstract class Utils
 {
@@ -38,20 +40,16 @@ public abstract class Utils
         }
     }
 
-    public static File getFileFromResource(String fileName) throws URISyntaxException, FileNotFoundException
+    public static File getFileFromResource(String fileName) throws URISyntaxException
     {
 
-        ClassLoader classLoader = Utils.class.getClassLoader();
-        URL resource = classLoader.getResource(fileName.trim());
-        if (resource == null)
-        {
-            throw new FileNotFoundException("File not found! " + fileName);
-        } else
-        {
+        Path resourceDirectory = Paths.get("src", "main", "resources", fileName);
+        String path = resourceDirectory.toString();
+        return FileUtil.createFileIfNeeded(path);
+    }
 
-            // failed if files have whitespaces or special characters
-            //return new File(resource.getFile());
-            return new File(resource.toURI());
-        }
+    public static File getFileFromResource(String fileName, String fileExtension) throws URISyntaxException, FileNotFoundException
+    {
+        return getFileFromResource(fileName + fileExtension);
     }
 }

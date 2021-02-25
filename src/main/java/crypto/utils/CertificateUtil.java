@@ -170,6 +170,7 @@ public class CertificateUtil
                     .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA).setProvider("BC").
                             build(rootPrivateKey)));// private key of signing authority , here it is signed by intermedCA
             saveCertificateToFile(endUserCert, Constants.CERT_DIR + username + CertificateUtil.CERT_EXTENSION);
+            savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), Constants.CERT_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION);
 
         } catch (NoSuchProviderException | CertificateException | NoSuchAlgorithmException | FileNotFoundException | CertIOException | OperatorCreationException ex)
         {

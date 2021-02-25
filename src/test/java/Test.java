@@ -35,13 +35,13 @@ public class Test
         CertificateUtil.initRootCertificate(); // make rootCA if needed
 
         User user = new User();
-        user.setUsername("pecanac");
-        user.setCommonName("Nenad Pecanac");
+        user.setUsername("coki");
+        user.setCommonName("Dragan Jovic");
         CertificateUtil.generateSignedUserCert(user.getCommonName(), user.getUsername()); // generate userCert signed with RootCA
 
         CertificateFactory factory = CertificateFactory.getInstance(X_509);
         X509Certificate userCert = (X509Certificate) factory
-                .generateCertificate(new FileInputStream(Constants.CERT_DIR + "pecanac" + CertificateUtil.CERT_EXTENSION));
+                .generateCertificate(new FileInputStream(Constants.CERT_DIR + "coki" + CertificateUtil.CERT_EXTENSION));
 
         System.out.println(CertificateUtil.getCommonNameFromCert(userCert));
     }

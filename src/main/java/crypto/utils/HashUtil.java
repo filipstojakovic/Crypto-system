@@ -22,9 +22,7 @@ public class HashUtil
         for (Provider.Service service : services)
         {
             if (service.getType().equalsIgnoreCase(type))
-            {
                 algos.add(service);
-            }
         }
 
         if (!algos.isEmpty())
@@ -36,7 +34,6 @@ public class HashUtil
                 providerHashList.add(algo);
             }
         }
-
         return providerHashList;
     }
 

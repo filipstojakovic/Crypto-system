@@ -18,7 +18,6 @@ import org.json.simple.parser.ParseException;
 
 public class UserChecker
 {
-
     public UserChecker()
     {
     }
@@ -28,7 +27,7 @@ public class UserChecker
      *
      * @return null if cypto.user does not exist, cypto.user if exists (with valid username and inputPassword)
      */
-    public UserJson checkUserExistence(@NotNull String inputUsername, @NotNull String inputPassword) throws IOException, URISyntaxException, ParseException
+    public UserJson checkUserExistence(@NotNull String inputUsername, @NotNull String inputPassword) throws IOException, ParseException
     {
         JSONArray userArray = JsonHandler.getUsersJsonArray();
         UserJson userJson = null;

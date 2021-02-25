@@ -5,7 +5,7 @@ import java.security.cert.X509Certificate;
 
 public class User
 {
-    //simetric key
+    //TODO: simetric key or smt
     private String username;
     private String commonName;
     private X509Certificate x509Certificate;

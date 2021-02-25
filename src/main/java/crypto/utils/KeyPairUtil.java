@@ -3,9 +3,8 @@ package crypto.utils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -32,30 +31,16 @@ public class KeyPairUtil
         return usercert.getPublicKey();
     }
 
+    static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException
+    {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA_ALGO, "BC");
+        keyPairGenerator.initialize(KEY_SIZE, new SecureRandom());
+        return keyPairGenerator.generateKeyPair();
+    }
+
     private static PublicKey loadUserPublicKey(X509Certificate usercert)
     {
         return usercert.getPublicKey();
-    }
-
-
-    private static PrivateKey loadUserPrivateKey(String username) throws FileNotFoundException, IOException
-    {
-        java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        try (PemReader pemReader = new PemReader(new FileReader
-                ((Paths.get(getPrivateKeyPath(username)).toFile()))))
-        {
-            PemObject pemObject = pemReader.readPemObject();
-            var pemContent = pemObject.getContent();
-            PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(pemContent);
-            KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGO);
-            return keyFactory.generatePrivate(encodedKeySpec);
-
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex)
-        {
-            ex.printStackTrace();
-        }
-
-        return null;
     }
 
     public static String getPrivateKeyPath(String username)
@@ -63,10 +48,40 @@ public class KeyPairUtil
         return Constants.PRIVATE_KEYS_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION;
     }
 
-    static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException
+    private static PrivateKey loadUserPrivateKey(String username) throws IOException
     {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA_ALGO, "BC");
-        keyPairGenerator.initialize(KEY_SIZE, new SecureRandom());
-        return keyPairGenerator.generateKeyPair();
+        Path path = Paths.get(getPrivateKeyPath(username));
+        return loadPrivateKey(path);
+    }
+
+    public static PrivateKey loadPrivateKey(Path path) throws IOException // maybe add algorithm for KeyFactory.getInstance
+    {
+        try (PemReader pemReader = new PemReader(new FileReader(path.toFile())))
+        {
+            PemObject pemObject = pemReader.readPemObject();
+            var pemContent = pemObject.getContent();
+            PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(pemContent);
+            KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGO);
+            return keyFactory.generatePrivate(encodedKeySpec);
+
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | FileNotFoundException ex)
+        {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    static void savePrivateKeyToFile(PrivateKey privateKey, String path)
+    {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(path))
+        {
+            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(
+                    privateKey.getEncoded());
+            fileOutputStream.write(pkcs8EncodedKeySpec.getEncoded());
+            fileOutputStream.flush();
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
     }
 }

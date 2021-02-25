@@ -5,7 +5,6 @@ import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -14,10 +13,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Paths;
 import java.security.*;
@@ -25,10 +21,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Random;
 
-import static crypto.utils.KeyPairUtil.RSA_ALGO;
 import static crypto.utils.KeyPairUtil.generateKeyPair;
 
 public class CertificateUtil
@@ -66,7 +60,7 @@ public class CertificateUtil
         return Paths.get(path).toFile();
     }
 
-    // check if there is certificate, init if there is not
+    // check if there is certificate, init if there is not ( self signed cert)
     public static void initRootCertificate()
     {
         try
@@ -90,49 +84,14 @@ public class CertificateUtil
                                     .setProvider("BC")
                                     .build(rootCAKeyPair.getPrivate()))); // private key of signing authority , here it is self signed
             saveCertificateToFile(rootCA, Constants.ROOT_CA_FILE_PATH);
-            savePrivateKeyToFile(rootCAKeyPair.getPrivate(), Constants.ROOT_CA_PRIVATE_KEY_FILE);
+            KeyPairUtil.savePrivateKeyToFile(rootCAKeyPair.getPrivate(), Constants.ROOT_CA_PRIVATE_KEY_FILE);
         } catch (Exception ex)
         {
             ex.printStackTrace();
         }
     }
 
-    private static void savePrivateKeyToFile(PrivateKey privateKey, String path)
-    {
-        try (FileOutputStream fileOutputStream = new FileOutputStream(path))
-        {
-            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(
-                    privateKey.getEncoded());
-            fileOutputStream.write(pkcs8EncodedKeySpec.getEncoded());
-            fileOutputStream.flush();
-        } catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-    }
-
-    private static PrivateKey loadPrivateKey(String path) // maybe add algorithm for KeyFactory.getInstance
-    {
-        PrivateKey privateKey = null;
-        File filePrivateKey = new File(path);
-        try (FileInputStream fis = new FileInputStream(filePrivateKey))
-        {
-            byte[] encodedPrivateKey = new byte[(int) filePrivateKey.length()];
-            fis.read(encodedPrivateKey);
-            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(
-                    encodedPrivateKey);
-            KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGO);
-            privateKey = keyFactory.generatePrivate(privateKeySpec);
-
-        } catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-
-        return privateKey;
-    }
-
-    public static File saveCertificateToFile(X509Certificate certificate, String filePath)
+    public static void saveCertificateToFile(X509Certificate certificate, String filePath)
     {
         File file = new File(filePath);
         try (FileOutputStream fileOutputStream = new FileOutputStream(file))
@@ -145,7 +104,6 @@ public class CertificateUtil
         {
             ex.printStackTrace();
         }
-        return file;
     }
 
     public static String getUserCertPath(String username)
@@ -153,14 +111,13 @@ public class CertificateUtil
         return Constants.CERT_DIR + username + CertificateUtil.CERT_EXTENSION;
     }
 
-    public static X509Certificate generateSignedUserCert(String commonName, String username)
+    public static void generateSignedUserCert(String commonName, String username)
     {
-        X509Certificate endUserCert = null;
         try
         {
             CertificateFactory factory = CertificateFactory.getInstance(X_509);
             X509Certificate rootCA = (X509Certificate) factory.generateCertificate(new FileInputStream(Constants.ROOT_CA_FILE_PATH));
-            PrivateKey rootPrivateKey = loadPrivateKey(Constants.ROOT_CA_PRIVATE_KEY_FILE);
+            PrivateKey rootPrivateKey = KeyPairUtil.loadPrivateKey(Paths.get(Constants.ROOT_CA_PRIVATE_KEY_FILE));
 
             KeyPair endUserCertKeyPair = generateKeyPair();
             X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(
@@ -171,17 +128,15 @@ public class CertificateUtil
                     new X500Name("CN=" + commonName), endUserCertKeyPair.getPublic());
             builder.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature));
             builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
-            endUserCert = new JcaX509CertificateConverter().getCertificate(builder
+            X509Certificate endUserCert = new JcaX509CertificateConverter().getCertificate(builder
                     .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA).setProvider("BC").
                             build(rootPrivateKey)));// private key of signing authority , here it is signed by intermedCA
             saveCertificateToFile(endUserCert, getUserCertPath(username));
-            savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), Constants.CERT_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION);
+            KeyPairUtil.savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), Constants.CERT_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION);
 
-        } catch (NoSuchProviderException | CertificateException | NoSuchAlgorithmException | FileNotFoundException | CertIOException | OperatorCreationException ex)
+        } catch (NoSuchProviderException | CertificateException | NoSuchAlgorithmException | OperatorCreationException | IOException ex)
         {
             ex.printStackTrace();
         }
-
-        return endUserCert;
     }
 }

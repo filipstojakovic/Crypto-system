@@ -15,6 +15,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -63,32 +64,33 @@ public class CertificateUtil
     // check if there is certificate, init if there is not ( self signed cert)
     public static void initRootCertificate()
     {
-        try
-        {
-            Security.addProvider(new BouncyCastleProvider());
-            // Create self signed Root CA certificate
-            KeyPair rootCAKeyPair = generateKeyPair();
-            X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(
-                    new X500Name("CN=rootCA"), // issuer authority
-                    BigInteger.valueOf(new Random().nextInt()), //serial number of certificate
-                    Utils.getCurrentDate(), // start of validity
-                    Utils.getNextYearDate(), //end of certificate validity
-                    new X500Name("CN=rootCA"), // subject name of certificate
-                    rootCAKeyPair.getPublic()); // public key of certificate
-            // key usage restrictions
-            builder.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.keyCertSign));
-            builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
-            X509Certificate rootCA = new JcaX509CertificateConverter()
-                    .getCertificate(builder
-                            .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA)
-                                    .setProvider("BC")
-                                    .build(rootCAKeyPair.getPrivate()))); // private key of signing authority , here it is self signed
-            saveCertificateToFile(rootCA, Constants.ROOT_CA_FILE_PATH);
-            KeyPairUtil.savePrivateKeyToFile(rootCAKeyPair.getPrivate(), Constants.ROOT_CA_PRIVATE_KEY_FILE);
-        } catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
+        if (!Files.exists(Paths.get(Constants.ROOT_CA_FILE_PATH)))
+            try
+            {
+                Security.addProvider(new BouncyCastleProvider());
+                // Create self signed Root CA certificate
+                KeyPair rootCAKeyPair = generateKeyPair();
+                X509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(
+                        new X500Name("CN=rootCA"), // issuer authority
+                        BigInteger.valueOf(new Random().nextInt()), //serial number of certificate
+                        Utils.getCurrentDate(), // start of validity
+                        Utils.getNextYearDate(), //end of certificate validity
+                        new X500Name("CN=rootCA"), // subject name of certificate
+                        rootCAKeyPair.getPublic()); // public key of certificate
+                // key usage restrictions
+                builder.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.keyCertSign));
+                builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
+                X509Certificate rootCA = new JcaX509CertificateConverter()
+                        .getCertificate(builder
+                                .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA)
+                                        .setProvider("BC")
+                                        .build(rootCAKeyPair.getPrivate()))); // private key of signing authority , here it is self signed
+                saveCertificateToFile(rootCA, Constants.ROOT_CA_FILE_PATH);
+                KeyPairUtil.savePrivateKeyToFile(rootCAKeyPair.getPrivate(), Constants.ROOT_CA_PRIVATE_KEY_FILE);
+            } catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
     }
 
     public static void saveCertificateToFile(X509Certificate certificate, String filePath)

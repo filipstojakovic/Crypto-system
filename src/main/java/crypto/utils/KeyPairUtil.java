@@ -56,17 +56,20 @@ public class KeyPairUtil
 
     public static PrivateKey loadPrivateKey(Path path) throws IOException // maybe add algorithm for KeyFactory.getInstance
     {
-        try (PemReader pemReader = new PemReader(new FileReader(path.toFile())))
+        File filePrivateKey = path.toFile();
+        try (FileInputStream inputStream = new FileInputStream(filePrivateKey))
         {
-            PemObject pemObject = pemReader.readPemObject();
-            var pemContent = pemObject.getContent();
-            PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(pemContent);
+            byte[] encodedPrivateKey = new byte[(int) filePrivateKey.length()];
+            inputStream.read(encodedPrivateKey);
             KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGO);
-            return keyFactory.generatePrivate(encodedKeySpec);
-
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException | FileNotFoundException ex)
+            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(encodedPrivateKey);
+            return keyFactory.generatePrivate(privateKeySpec);
+        } catch (NoSuchAlgorithmException e)
         {
-            ex.printStackTrace();
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e)
+        {
+            e.printStackTrace();
         }
         return null;
     }

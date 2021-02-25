@@ -21,10 +21,9 @@ public class Test
     {
         Security.addProvider(new BouncyCastleProvider());
 
-        //        testCerts();
-
+        testCerts();
         //                MainApp.initDirs();
-        HashUtil.getAllHashAlgo().forEach(System.out::println);
+        //        HashUtil.getAllHashAlgo().forEach(System.out::println);
 
     }
 
@@ -44,6 +43,9 @@ public class Test
         X509Certificate userCert = (X509Certificate) factory
                 .generateCertificate(new FileInputStream(Constants.CERT_DIR + "coki" + CertificateUtil.CERT_EXTENSION));
 
+        System.out.println(userCert.getNotAfter());
+        System.out.println(userCert.getSigAlgName());
+        System.out.println(userCert.getSubjectDN());
         System.out.println(CertificateUtil.getCommonNameFromCert(userCert));
     }
 

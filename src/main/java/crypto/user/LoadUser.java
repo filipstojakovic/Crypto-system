@@ -1,5 +1,6 @@
 package crypto.user;
 
+import crypto.user.jsonhandler.UserJson;
 import crypto.utils.CertificateUtil;
 import crypto.utils.KeyPairUtil;
 
@@ -16,7 +17,8 @@ public class LoadUser
     {
     }
 
-    public User loadUser(User user) throws FileNotFoundException, IOException, CertificateException
+    //TODO: Load real user to work with...
+    public User loadUser(UserJson user) throws FileNotFoundException, IOException, CertificateException
     {
         X509Certificate userCert = CertificateUtil.loadCertificate(user.getUsername());
         String commonName = CertificateUtil.getCommonNameFromCert(userCert);
@@ -24,13 +26,14 @@ public class LoadUser
 
         if (userCert != null && commonName != null && userKeyPair != null)
         {
-            user.setCommonName(commonName);
-            user.setX509Certificate(userCert);
-            user.setKeyPair(userKeyPair);
+//            user.setCommonName(commonName);
+//            user.setX509Certificate(userCert);
+//            user.setKeyPair(userKeyPair);
         } else
             return null;
 
-        return user;
+        return new User();
+//        return user;
     }
 
 

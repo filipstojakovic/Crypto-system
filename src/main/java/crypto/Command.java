@@ -2,7 +2,7 @@ package crypto;
 
 import crypto.user.User;
 import crypto.utils.FileUtil;
-import crypto.utils.PathConsts;
+import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
 
@@ -37,7 +37,7 @@ public class Command
         {
             try
             {
-                PrintUtil.printColorful(pathBuilder.toString() + PathConsts.COMMAND_TERMINATOR);
+                PrintUtil.printColorful(pathBuilder.toString() + Constants.COMMAND_TERMINATOR);
                 input = MainApp.scanner.nextLine();
                 analyzeInput(input);
 
@@ -119,7 +119,7 @@ public class Command
 
     private StringBuilder newUserPathBuilder()
     {
-        return new StringBuilder(PathConsts.USER_DIR + user.getUsername());
+        return new StringBuilder(Constants.USER_DIR + user.getUsername());
     }
 
     private void isUserFolderExists()

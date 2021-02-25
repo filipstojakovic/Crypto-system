@@ -1,12 +1,15 @@
 package crypto;
 
 import crypto.utils.CertificateUtil;
+import crypto.utils.Constants;
 import crypto.utils.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.Security;
 import java.util.Scanner;
 
@@ -25,8 +28,10 @@ public class MainApp
     {
         try
         {
-            CertificateUtil.initRootCertificate();
             Security.addProvider(new BouncyCastleProvider());
+
+            initDirs();
+            CertificateUtil.initRootCertificate();
             int command;
             do
             {
@@ -79,4 +84,11 @@ public class MainApp
         login.handleLogin();
     }
 
+    public static void initDirs() throws IOException
+    {
+        Files.createDirectories(Paths.get(Constants.CERT_DIR));
+        Files.createDirectories(Paths.get(Constants.PRIVATE_KEYS_DIR));
+        Files.createDirectories(Paths.get(Constants.USER_DIR));
+        Files.createDirectories(Paths.get(Constants.ROOT_CA_DIR));
+    }
 }

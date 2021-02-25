@@ -1,13 +1,11 @@
 package crypto.utils;
 
-import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -16,6 +14,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 
 public class KeyPairUtil
 {
+    public static final String RSA_ALGO = "RSA";
+    public static final String PRIVATE_KEY_EXTENSION = "Private.key";
+    public static final int KEY_SIZE = 2048;
+
     public static KeyPair loadUserKeyPair(String username) throws IOException
     {
         PublicKey publicKey = loadUserPublicKey(username);
@@ -30,15 +32,22 @@ public class KeyPairUtil
         return usercert.getPublicKey();
     }
 
+    private static PublicKey loadUserPublicKey(X509Certificate usercert)
+    {
+        return usercert.getPublicKey();
+    }
+
+
     private static PrivateKey loadUserPrivateKey(String username) throws FileNotFoundException, IOException
     {
-         java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        try (PemReader pemReader = new PemReader(new FileReader((Paths.get(PathConsts.PRIVATE_KEYS_DIR + "r2.key").toFile())))) //TODO: ovdje r1 treba zamijeniti
+        java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        try (PemReader pemReader = new PemReader(new FileReader
+                ((Paths.get(Constants.PRIVATE_KEYS_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION).toFile()))))
         {
             PemObject pemObject = pemReader.readPemObject();
             var pemContent = pemObject.getContent();
             PKCS8EncodedKeySpec encodedKeySpec = new PKCS8EncodedKeySpec(pemContent);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGO);
             return keyFactory.generatePrivate(encodedKeySpec);
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException ex)
@@ -52,8 +61,8 @@ public class KeyPairUtil
 
     static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        KeyPairGenerator kpGen = KeyPairGenerator.getInstance("RSA", "BC");
-        kpGen.initialize(2048, new SecureRandom());
-        return kpGen.generateKeyPair();
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA_ALGO, "BC");
+        keyPairGenerator.initialize(KEY_SIZE, new SecureRandom());
+        return keyPairGenerator.generateKeyPair();
     }
 }

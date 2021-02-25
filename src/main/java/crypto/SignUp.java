@@ -1,7 +1,6 @@
 package crypto;
 
-import crypto.user.User;
-import crypto.user.UserChecker;
+import crypto.user.jsonhandler.JsonHandler;
 import crypto.utils.CertificateUtil;
 import crypto.utils.HashUtil;
 import crypto.utils.PrintUtil;
@@ -13,7 +12,6 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -36,7 +34,7 @@ public class SignUp
         String hashAlg = randomHashAlg();
         String randomSalt = randomSalt();
 
-        X509Certificate userCert = CertificateUtil.generateUserCert(new User());
+        X509Certificate userCert = CertificateUtil.generateSignedUserCert(commonName,userName);
 
         //todo: make userCert file, add path to userJson
         //todo: generate privateKey file, add path to userJson
@@ -71,7 +69,7 @@ public class SignUp
     @NotNull
     private String enterUserName() throws ParseException, IOException, URISyntaxException
     {
-        JSONArray users = (new UserChecker()).getUsersJsonArray();
+        JSONArray users = JsonHandler.getUsersJsonArray();
         List<String> usernameList = (List<String>) users.stream() // get all usernames from json
                 .map(obj -> ((JSONObject) obj).get("username").toString())
                 .collect(Collectors.toList());

@@ -5,16 +5,14 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 public abstract class Utils
 {
-    public static final long DAY_IN_MILLS = 1000L * 60 * 60 * 24;
-    public static final long THIRTY_DAYS = DAY_IN_MILLS * 30;
-    public static final long YEAR_IN_MILLS = 365 * DAY_IN_MILLS;
 
     public static final int LINE_NUM = 55;
     public static final String REGEX_SPACES = "\\s";
@@ -45,7 +43,6 @@ public abstract class Utils
 
     public static File getFileFromResource(String fileName) throws URISyntaxException
     {
-
         Path resourceDirectory = Paths.get("src", "main", "resources", fileName);
         String path = resourceDirectory.toString();
         return FileUtil.createFileIfNeeded(path);
@@ -68,5 +65,17 @@ public abstract class Utils
                 .limit(length)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+    }
+
+    public static Date getCurrentDate()
+    {
+        return new Date(System.currentTimeMillis() - 1000L * 5);
+    }
+
+    public static Date getNextYearDate()
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, 1); // to get previous year add -1
+        return cal.getTime();
     }
 }

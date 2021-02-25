@@ -3,6 +3,7 @@ package crypto;
 import crypto.user.LoadUser;
 import crypto.user.User;
 import crypto.user.UserChecker;
+import crypto.user.jsonhandler.UserJson;
 import crypto.utils.Utils;
 import org.json.simple.parser.ParseException;
 
@@ -19,7 +20,7 @@ public class Login
         try
         {
             Utils.clearScreen();
-            User userJSON = getUserInfo();
+            UserJson userJSON = getUserInfo();
             User user = new LoadUser().loadUser(userJSON);
             Command control = new Command(user);
             control.takeUserInputs();
@@ -31,10 +32,10 @@ public class Login
         }
     }
 
-    private static User getUserInfo() throws IOException, URISyntaxException, ParseException
+    private static UserJson getUserInfo() throws IOException, URISyntaxException, ParseException
     {
         UserChecker userChecker = new UserChecker();
-        User user = null;
+        UserJson user = null;
         do
         {
             System.out.print("Enter username: ");

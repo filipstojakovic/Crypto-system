@@ -2,14 +2,12 @@ package crypto.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import crypto.utils.Utils;
+import crypto.user.jsonhandler.JsonHandler;
+import crypto.user.jsonhandler.UserJson;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
@@ -29,10 +27,10 @@ public class UserChecker
      *
      * @return null if cypto.user does not exist, cypto.user if exists (with valid username and inputPassword)
      */
-    public User checkUserExistence(@NotNull String inputUsername, @NotNull String inputPassword) throws IOException, URISyntaxException, ParseException
+    public UserJson checkUserExistence(@NotNull String inputUsername, @NotNull String inputPassword) throws IOException, URISyntaxException, ParseException
     {
-        JSONArray userArray = getUsersJsonArray();
-        User user = null;
+        JSONArray userArray = JsonHandler.getUsersJsonArray();
+        UserJson userJson = null;
         boolean isFound = false;
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -41,13 +39,13 @@ public class UserChecker
             try
             {
                 JSONObject userObj = (JSONObject) userArray.get(i);
-                user = objectMapper.readValue(userObj.toString(), User.class);
-                if (inputUsername.equals(user.getUsername()))
+                userJson = objectMapper.readValue(userObj.toString(), UserJson.class);
+                if (inputUsername.equals(userJson.getUsername()))
                 {
                     try
                     {
-                        isFound = checkUserPassword(user, inputPassword);
-                        //TODO: maybe break the loop if password does not match
+                        isFound = checkUserPassword(userJson, inputPassword);
+                        break;
                     } catch (NoSuchAlgorithmException ex)
                     {
                         ex.printStackTrace();
@@ -59,36 +57,17 @@ public class UserChecker
             }
         }
 
-        return isFound ? user : null;   //if found return cypto.user else return null
+        return isFound ? userJson : null;   //if found return userJson else return null
     }
 
-    private boolean checkUserPassword(User user, String inputPassword) throws NoSuchAlgorithmException
+    private boolean checkUserPassword(UserJson userJson, String inputPassword) throws NoSuchAlgorithmException
     {
-        MessageDigest messageDigest = MessageDigest.getInstance(user.getHashalg());
+        MessageDigest messageDigest = MessageDigest.getInstance(userJson.getHashalg());
         messageDigest.reset();
-        messageDigest.update(user.getSalt().getBytes());
+        messageDigest.update(userJson.getSalt().getBytes());
         byte[] hashedInputPassword = messageDigest.digest(inputPassword.getBytes());
         String haxPassword = crypto.utils.Utils.bytesToHex(hashedInputPassword);
-        return haxPassword.equals(user.getPassword());
+        return haxPassword.equals(userJson.getPassword());
     }
 
-    //get all users in JSONArray format from resources/users.json file
-    public JSONArray getUsersJsonArray() throws IOException, URISyntaxException, ParseException
-    {
-        JSONArray usersArray = null;
-
-        File userFile = Utils.getFileFromResource(crypto.utils.PathConsts.USERS_JSON);
-        if(userFile.length()==0)
-            return new JSONArray();
-
-        FileReader reader = new FileReader(userFile);
-        //Read JSON file
-        JSONParser jsonParser = new JSONParser();
-        Object obj = jsonParser.parse(reader);
-        usersArray = (JSONArray) obj;
-
-        reader.close();
-
-        return usersArray;
-    }
 }

@@ -10,6 +10,7 @@ public class User
     private String salt;
     private String hashalg;
 
+    // TODO: split into UserJson, save username here and botom half
     private String commonName;
     private X509Certificate x509Certificate;
     private KeyPair keyPair;

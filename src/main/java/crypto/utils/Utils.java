@@ -1,11 +1,14 @@
 package crypto.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Random;
 
 public abstract class Utils
 {
@@ -51,5 +54,19 @@ public abstract class Utils
     public static File getFileFromResource(String fileName, String fileExtension) throws URISyntaxException, FileNotFoundException
     {
         return getFileFromResource(fileName + fileExtension);
+    }
+
+
+    @NotNull
+    public static String randomString(int length)
+    {
+        Random random = new Random();
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+
+        return random.ints(leftLimit, rightLimit + 1)
+                .limit(length)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 }

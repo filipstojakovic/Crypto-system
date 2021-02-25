@@ -15,6 +15,7 @@ import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.joda.time.DateTime;
 
 import java.io.*;
@@ -33,6 +34,7 @@ public class CertificateUtil
     public static final String CERT_EXTENSION = ".pem";
 
     public static final String ROOT_CER = "rootCA" + File.separator + "rootCA.cer";
+    public static final String SHA_256_WITH_RSA = "SHA256withRSA";
 
     public static X509Certificate loadCertificate(String username) throws FileNotFoundException
     {
@@ -83,7 +85,7 @@ public class CertificateUtil
             builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
             X509Certificate rootCA = new JcaX509CertificateConverter()
                     .getCertificate(builder
-                            .build(new JcaContentSignerBuilder("SHA256withRSA")
+                            .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA)
                                     .setProvider("BC")
                                     .build(rootCAKeyPair.getPrivate()))); // private key of signing authority , here it is self signed
             saveCertificateToFile(rootCA, "rootCA" + File.separator + "rootCA.cer");
@@ -135,6 +137,7 @@ public class CertificateUtil
     {
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath))
         {
+
             fileOutputStream.write(certificate.getEncoded());
             fileOutputStream.flush();
 
@@ -144,9 +147,10 @@ public class CertificateUtil
         }
     }
 
-    public static void generateUserCert(User user)
+    public static X509Certificate generateUserCert(User user)
     {
         //user must have common name here on out...
+        X509Certificate endUserCert = null;
         try
         {
             CertificateFactory factory = CertificateFactory.getInstance(X_509);
@@ -158,11 +162,11 @@ public class CertificateUtil
                     rootCA, //here rootCA is issuer authority
                     BigInteger.valueOf(new Random().nextInt()), DateTime.now().toDate(),
                     new DateTime(2025, 12, 31, 0, 0, 0, 0).toDate(),
-                    new X500Name("CN="+user.getCommonName()), endUserCertKeyPair.getPublic()); //TODO: update common name
+                    new X500Name("CN=" + user.getCommonName()), endUserCertKeyPair.getPublic());
             builder.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature));
             builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
-            X509Certificate endUserCert = new JcaX509CertificateConverter().getCertificate(builder
-                    .build(new JcaContentSignerBuilder("SHA256withRSA").setProvider("BC").
+            endUserCert = new JcaX509CertificateConverter().getCertificate(builder
+                    .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA).setProvider("BC").
                             build(rootPrivateKey)));// private key of signing authority , here it is signed by intermedCA
             saveCertificateToFile(endUserCert, "userCert" + File.separator + user.getUsername() + "Cert.cer");
 
@@ -170,5 +174,7 @@ public class CertificateUtil
         {
             ex.printStackTrace();
         }
+
+        return endUserCert;
     }
 }

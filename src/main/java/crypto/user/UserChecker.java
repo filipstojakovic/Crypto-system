@@ -19,10 +19,6 @@ import org.json.simple.parser.ParseException;
 
 public class UserChecker
 {
-    public static final String USER = "username";
-    public static final String HASH_ALG = "hashalg";
-    public static final String SALT = "salt";
-    public static final String PASSWORD = "password";
 
     public UserChecker()
     {

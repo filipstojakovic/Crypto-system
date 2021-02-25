@@ -41,17 +41,17 @@ public abstract class Utils
         }
     }
 
-    public static File getFileFromResource(String fileName) throws URISyntaxException
-    {
-        Path resourceDirectory = Paths.get("src", "main", "resources", fileName);
-        String path = resourceDirectory.toString();
-        return FileUtil.createFileIfNeeded(path);
-    }
-
-    public static File getFileFromResource(String fileName, String fileExtension) throws URISyntaxException, FileNotFoundException
-    {
-        return getFileFromResource(fileName + fileExtension);
-    }
+//    public static File getFileFromResource(String fileName) throws URISyntaxException
+//    {
+//        Path resourceDirectory = Paths.get("src", "main", "resources", fileName);
+//        String path = resourceDirectory.toString();
+//        return FileUtil.createFileIfNeeded(path);
+//    }
+//
+//    public static File getFileFromResource(String fileName, String fileExtension) throws URISyntaxException, FileNotFoundException
+//    {
+//        return getFileFromResource(fileName + fileExtension);
+//    }
 
 
     @NotNull

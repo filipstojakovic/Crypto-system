@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import crypto.user.jsonhandler.JsonHandler;
 import crypto.user.jsonhandler.UserJson;
+import crypto.utils.HashUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -42,16 +43,10 @@ public class UserChecker
                 userJson = objectMapper.readValue(userObj.toString(), UserJson.class);
                 if (inputUsername.equals(userJson.getUsername()))
                 {
-                    try
-                    {
-                        isFound = checkUserPassword(userJson, inputPassword);
-                        break;
-                    } catch (NoSuchAlgorithmException ex)
-                    {
-                        ex.printStackTrace();
-                    }
+                    isFound = checkUserPassword(userJson, inputPassword);
+                    break;
                 }
-            } catch (UnrecognizedPropertyException ex)
+            } catch (UnrecognizedPropertyException | NoSuchAlgorithmException ex)
             {
                 ex.printStackTrace();
             }
@@ -62,11 +57,7 @@ public class UserChecker
 
     private boolean checkUserPassword(UserJson userJson, String inputPassword) throws NoSuchAlgorithmException
     {
-        MessageDigest messageDigest = MessageDigest.getInstance(userJson.getHashalg());
-        messageDigest.reset();
-        messageDigest.update(userJson.getSalt().getBytes());
-        byte[] hashedInputPassword = messageDigest.digest(inputPassword.getBytes());
-        String haxPassword = crypto.utils.Utils.bytesToHex(hashedInputPassword);
+        String haxPassword = HashUtil.hashedPassword(inputPassword, userJson.getSalt(), userJson.getHashalg());
         return haxPassword.equals(userJson.getPassword());
     }
 

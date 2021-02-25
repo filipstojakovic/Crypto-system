@@ -1,11 +1,11 @@
+import crypto.MainApp;
 import crypto.user.User;
 import crypto.utils.CertificateUtil;
 import crypto.utils.Constants;
+import crypto.utils.HashUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -19,11 +19,12 @@ public class Test
 {
     public static void main(String[] args) throws Exception
     {
-        testCerts();
+        Security.addProvider(new BouncyCastleProvider());
 
-        //        MainApp.initDirs();
+        //        testCerts();
 
-        //        HashUtil.getAllHashAlgo().forEach(System.out::println);
+        //                MainApp.initDirs();
+        HashUtil.getAllHashAlgo().forEach(System.out::println);
 
     }
 

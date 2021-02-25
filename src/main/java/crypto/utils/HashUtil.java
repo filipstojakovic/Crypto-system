@@ -1,6 +1,9 @@
 package crypto.utils;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
@@ -9,6 +12,31 @@ import java.util.Set;
 
 public class HashUtil
 {
+
+    public static String hashedPassword(String password, String salt, String hashAlgo) throws NoSuchAlgorithmException
+    {
+        MessageDigest messageDigest = MessageDigest.getInstance(hashAlgo);
+        messageDigest.reset();
+        messageDigest.update(salt.getBytes());
+        byte[] hashedInputPassword = messageDigest.digest(password.getBytes());
+        return Utils.bytesToHex(hashedInputPassword);
+    }
+
+    public static List<String> getAllHashAlgo()
+    {
+        List<String> hashAlgoList = new ArrayList<>();
+        Provider[] providers = Security.getProviders();
+        for (Provider provider : providers)
+        {
+            if (provider instanceof BouncyCastleProvider) //ima ih previse
+                continue;
+
+            List<String> algos = showHashAlgorithms(provider, MessageDigest.class);
+            if (algos != null && !algos.isEmpty())
+                hashAlgoList.addAll(algos);
+        }
+        return hashAlgoList;
+    }
 
     //refleksija je cudo :D
     private static List<String> showHashAlgorithms(Provider prov, Class<?> typeClass)
@@ -35,18 +63,5 @@ public class HashUtil
             }
         }
         return providerHashList;
-    }
-
-    public static List<String> getAllHashAlgo()
-    {
-        List<String> hashAlgoList = new ArrayList<>();
-        Provider[] providers = Security.getProviders();
-        for (Provider provider : providers)
-        {
-            List<String> algos = showHashAlgorithms(provider, MessageDigest.class);
-            if (algos != null && !algos.isEmpty())
-                hashAlgoList.addAll(algos);
-        }
-        return hashAlgoList;
     }
 }

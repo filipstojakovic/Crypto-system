@@ -42,7 +42,7 @@ public class KeyPairUtil
     {
         java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         try (PemReader pemReader = new PemReader(new FileReader
-                ((Paths.get(Constants.PRIVATE_KEYS_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION).toFile()))))
+                ((Paths.get(getPrivateKeyPath(username)).toFile()))))
         {
             PemObject pemObject = pemReader.readPemObject();
             var pemContent = pemObject.getContent();
@@ -58,6 +58,10 @@ public class KeyPairUtil
         return null;
     }
 
+    public static String getPrivateKeyPath(String username)
+    {
+        return Constants.PRIVATE_KEYS_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION;
+    }
 
     static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException
     {

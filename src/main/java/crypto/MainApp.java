@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.util.Scanner;
 
@@ -45,13 +46,7 @@ public class MainApp
 
             } while (command != 0);
 
-        } catch (ParseException e)
-        {
-            e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        } catch (URISyntaxException e)
+        } catch (ParseException | URISyntaxException | NoSuchAlgorithmException | IOException e)
         {
             e.printStackTrace();
         }
@@ -72,7 +67,7 @@ public class MainApp
         return command;
     }
 
-    private static void signup() throws ParseException, IOException, URISyntaxException
+    private static void signup() throws ParseException, IOException, URISyntaxException, NoSuchAlgorithmException
     {
         SignUp signUp = new SignUp();
         signUp.handleSignUp();

@@ -12,6 +12,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -25,7 +26,7 @@ public class SignUp
     public static final int MIN_SALT_SIZE = 5;
     public static final int MAX_SALT_SIZE = 15;
 
-    public void handleSignUp() throws ParseException, IOException, URISyntaxException
+    public void handleSignUp() throws ParseException, IOException, URISyntaxException, NoSuchAlgorithmException
     {
         String commonName = enterCommonName();
         String userName = enterUserName();
@@ -33,14 +34,12 @@ public class SignUp
 
         String hashAlg = randomHashAlg();
         String randomSalt = randomSalt();
+        String hashedPassword = HashUtil.hashedPassword(password,randomSalt, hashAlg);
 
-        X509Certificate userCert = CertificateUtil.generateSignedUserCert(commonName,userName);
+        CertificateUtil.generateSignedUserCert(commonName,userName); // creates Cert and private key
 
-        //todo: make userCert file, add path to userJson
-        //todo: generate privateKey file, add path to userJson
-        //JSONObject userJson = createUserJson(commonName,userName,password);
-        //make password hash, salt, certificate
-        System.out.println(commonName + " " + userName + " " + password);
+        JSONObject userJsonObj = JsonHandler.createUserJson(userName,hashAlg,randomSalt,hashedPassword);
+        JsonHandler.saveUserJsonToFile(userJsonObj);
     }
 
     private String randomSalt()
@@ -110,5 +109,4 @@ public class SignUp
         return password;
     }
 
-    //use random hash algo and save to jason
 }

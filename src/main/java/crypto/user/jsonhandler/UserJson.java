@@ -17,21 +17,17 @@ public class UserJson
     private String hashalg;
     private String salt;
     private String password;
-    private String certPath;
-    private String privateKeyPath;
 
     public UserJson()
     {
     }
 
-    public UserJson(String username, String hashalg, String salt, String password, String certPath, String privateKeyPath)
+    public UserJson(String username, String hashalg, String salt, String password)
     {
         this.username = username;
         this.hashalg = hashalg;
         this.salt = salt;
         this.password = password;
-        this.certPath = certPath;
-        this.privateKeyPath = privateKeyPath;
     }
 
     public String getUsername()
@@ -72,25 +68,5 @@ public class UserJson
     public void setPassword(String password)
     {
         this.password = password;
-    }
-
-    public String getCertPath()
-    {
-        return certPath;
-    }
-
-    public void setCertPath(String certPath)
-    {
-        this.certPath = certPath;
-    }
-
-    public String getPrivateKeyPath()
-    {
-        return privateKeyPath;
-    }
-
-    public void setPrivateKeyPath(String privateKeyPath)
-    {
-        this.privateKeyPath = privateKeyPath;
     }
 }

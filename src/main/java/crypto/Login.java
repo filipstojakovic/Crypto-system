@@ -14,7 +14,6 @@ import static crypto.MainApp.scanner;
 
 public class Login
 {
-
     public void handleLogin()
     {
         try

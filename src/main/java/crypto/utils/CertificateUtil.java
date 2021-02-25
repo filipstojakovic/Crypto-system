@@ -148,6 +148,11 @@ public class CertificateUtil
         return file;
     }
 
+    public static String getUserCertPath(String username)
+    {
+        return Constants.CERT_DIR + username + CertificateUtil.CERT_EXTENSION;
+    }
+
     public static X509Certificate generateSignedUserCert(String commonName, String username)
     {
         X509Certificate endUserCert = null;
@@ -169,7 +174,7 @@ public class CertificateUtil
             endUserCert = new JcaX509CertificateConverter().getCertificate(builder
                     .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA).setProvider("BC").
                             build(rootPrivateKey)));// private key of signing authority , here it is signed by intermedCA
-            saveCertificateToFile(endUserCert, Constants.CERT_DIR + username + CertificateUtil.CERT_EXTENSION);
+            saveCertificateToFile(endUserCert, getUserCertPath(username));
             savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), Constants.CERT_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION);
 
         } catch (NoSuchProviderException | CertificateException | NoSuchAlgorithmException | FileNotFoundException | CertIOException | OperatorCreationException ex)

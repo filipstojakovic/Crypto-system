@@ -69,7 +69,7 @@ public abstract class Utils
 
     public static Date getCurrentDate()
     {
-        return new Date(System.currentTimeMillis() - 1000L * 5);
+        return new Date(System.currentTimeMillis() - 1000L * 5); // 5 sec before current date
     }
 
     public static Date getNextYearDate()

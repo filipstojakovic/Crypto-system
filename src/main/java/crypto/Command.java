@@ -9,10 +9,11 @@ import crypto.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
+import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
 public class Command
@@ -24,7 +25,7 @@ public class Command
     public Command(User user)
     {
         this.user = user;
-        pathBuilder = newUserPathBuilder();
+        pathBuilder = resetUserPathBuilder();
         isUserFolderExists();
     }
 
@@ -83,7 +84,12 @@ public class Command
                 break;
 
             case "mkdir":
+            case "mkdirs":
                 makeDirsCommand(input);
+                break;
+            //TODO: make show shared folder content
+            case "ls":
+                lsCommand();
                 break;
 
             case "cat":
@@ -96,21 +102,8 @@ public class Command
                     System.out.println("deleted");
                 break;
 
-            case "ls":
-                var fileList = Files.list(Paths.get(pathBuilder.toString())).collect(Collectors.toList());
-                if (fileList.isEmpty())
-                    System.out.println("Empty folder");
-                else
-                    fileList.forEach(x ->
-                    {
-                        if (x.toFile().isFile())
-                            System.out.println(x.getFileName().toString());
-                        else
-                            PrintUtil.printlnColorful(x.getFileName().toString(), PrintUtil.ANSI_YELLOW);
-                    });
-                break;
-
             case "clear":
+            case "cls":
                 Utils.clearScreen();
                 break;
 
@@ -125,20 +118,46 @@ public class Command
 
     }
 
+    private void lsCommand() throws IOException
+    {
+        var fileList = Files.list(Paths.get(pathBuilder.toString())).collect(Collectors.toList());
+        if (fileList.isEmpty())
+            System.out.println("Empty folder");
+        else
+            fileList.forEach(x ->
+            {
+                if (x.toFile().isFile())
+                    System.out.println(x.getFileName().toString());
+                else
+                    PrintUtil.printlnColorful(x.getFileName().toString(), PrintUtil.ANSI_YELLOW);
+            });
+    }
+
     private void cdCommand(String input) throws IOException, InvalidNumOfArguemntsException
     {
-        //TODO: make cd ~ and cd ..
         if (Utils.checkForTwoArguments(input))
         {
             var splted = input.split(Utils.REGEX_SPACES);
             String path = splted[1].replaceAll("\\|/", File.separator);
             String fullPath = pathBuilder.toString() + File.separator + path;
-            if(Paths.get(fullPath).toFile().exists())
+            switch (splted[1])
             {
-                pathBuilder = new StringBuilder(fullPath);
-            }else
-                throw new IOException();
-        }else
+                case "~":
+                    resetUserPathBuilder();
+                    break;
+                case "..":
+                    //TODO: make cd ..
+                    break;
+                default:
+
+                    if (Paths.get(fullPath).toFile().exists())
+                    {
+                        pathBuilder = new StringBuilder(fullPath);
+                    } else
+                        throw new IOException();
+            }
+
+        } else
             throw new InvalidNumOfArguemntsException();
     }
 
@@ -169,7 +188,7 @@ public class Command
             throw new InvalidNumOfArguemntsException();
     }
 
-    private StringBuilder newUserPathBuilder()
+    private StringBuilder resetUserPathBuilder()
     {
         return new StringBuilder(Constants.USER_DIR + user.getUsername());
     }

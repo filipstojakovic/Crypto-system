@@ -116,6 +116,18 @@ public class CertificateUtil
         }
     }
 
+    public static String getSubjectDn(X509Certificate x509cert)
+    {
+        Principal principal = x509cert.getSubjectDN();
+        return principal.getName();
+    }
+
+    public static String getIssuerDn(X509Certificate x509cert)
+    {
+        Principal principal = x509cert.getIssuerDN();
+        return principal.getName();
+    }
+
     public static String getUserCertPath(String username)
     {
         return Constants.CERT_DIR + username + CertificateUtil.CERT_EXTENSION;
@@ -135,12 +147,15 @@ public class CertificateUtil
                     BigInteger.valueOf(new Random().nextInt()),
                     Utils.getCurrentDate(),
                     Utils.getNextYearDate(),
-                    new X500Name("CN=" + commonName), endUserCertKeyPair.getPublic());
+                    new X500Name("CN=" + commonName),
+                    endUserCertKeyPair.getPublic());
             builder.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature));
             builder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
-            X509Certificate endUserCert = new JcaX509CertificateConverter().getCertificate(builder
-                    .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA).setProvider("BC").
-                            build(rootPrivateKey)));// private key of signing authority , here it is signed by intermedCA
+            X509Certificate endUserCert = new JcaX509CertificateConverter()
+                    .getCertificate(builder
+                            .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA)
+                                    .setProvider("BC").
+                                            build(rootPrivateKey)));// private key of signing authority , here it is signed by rootCA
             saveCertificateToFile(endUserCert, getUserCertPath(username));
             KeyPairUtil.savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), KeyPairUtil.getPrivateKeyPath(username));
 

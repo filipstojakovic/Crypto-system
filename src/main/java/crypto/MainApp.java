@@ -2,6 +2,7 @@ package crypto;
 
 import crypto.utils.CertificateUtil;
 import crypto.utils.Constants;
+import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.json.simple.parser.ParseException;
@@ -15,6 +16,8 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.util.Scanner;
 
 /**
@@ -31,9 +34,8 @@ public class MainApp
     //fun start here
     public static void main(String[] args) throws IOException
     {
-
+        Utils.clearScreen();
         Security.addProvider(new BouncyCastleProvider());
-
         initDirs();
         CertificateUtil.initRootCertificate();
         int command = -1;
@@ -41,14 +43,17 @@ public class MainApp
         {
             try
             {
-                Utils.clearScreen();
                 command = loginOrSignUp();
                 switch (command)
                 {
                     case LOGIN -> login();
                     case SIGNUP -> signup();
                 }
-            } catch (ParseException | URISyntaxException | NoSuchAlgorithmException | IOException  e)
+            }catch(CertificateNotYetValidException | CertificateExpiredException ex)
+            {
+                PrintUtil.printlnErrorMsg("Invalid Certificate " + ex.getMessage());
+
+            } catch (ParseException | URISyntaxException | NoSuchAlgorithmException | IOException e)
             {
                 e.printStackTrace();
             }
@@ -69,7 +74,8 @@ public class MainApp
 
             try
             {
-                number = scanner.readLine();
+//                number = scanner.readLine(); //TODO: uncomment this
+                number = "1";
                 command = Integer.parseInt(number);
 
             } catch (NumberFormatException ex)
@@ -88,7 +94,7 @@ public class MainApp
         signUp.handleSignUp();
     }
 
-    private static void login() throws URISyntaxException, ParseException, IOException
+    private static void login() throws URISyntaxException, ParseException, IOException, CertificateNotYetValidException, CertificateExpiredException
     {
         Login login = new Login();
         login.handleLogin();

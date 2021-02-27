@@ -34,6 +34,6 @@ public class PrintUtil
 
     public static void printlnErrorMsg(String msg)
     {
-        System.out.print(ANSI_RED + msg + RESET);
+        System.out.println(ANSI_RED + msg + RESET);
     }
 }

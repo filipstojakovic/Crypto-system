@@ -10,20 +10,23 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 
 import static crypto.MainApp.scanner;
 
 public class Login
 {
-    public void handleLogin() throws ParseException, IOException, URISyntaxException
+    public void handleLogin() throws ParseException, IOException, URISyntaxException, CertificateNotYetValidException, CertificateExpiredException
     {
 
-        Utils.clearScreen();
         UserJson userJSON = getUserInfo();
 
         if (userJSON != null)
         {
             User user = User.loadUser(userJSON);
+
+            user.getX509Certificate().checkValidity();
             Command control = new Command(user);
             control.takeUserInputs();
         }
@@ -35,10 +38,14 @@ public class Login
         UserJson user = null;
         do
         {
-            System.out.print("Enter username: ");
-            String username = scanner.readLine().trim();
-            System.out.print("Enter password: ");
-            String password = scanner.readLine().trim();
+//            System.out.print("Enter username: ");
+//            String username = scanner.readLine().trim();
+//            System.out.print("Enter password: ");
+//            String password = scanner.readLine().trim();
+
+            String username = "fipa"; //TODO: uncomment above
+            String password = "stoja";
+
             user = userChecker.checkUserExistence(username, password);
 
             if (user == null)

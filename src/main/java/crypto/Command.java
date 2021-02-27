@@ -30,15 +30,13 @@ public class Command
     {
         Utils.clearScreen();
         System.out.println("Welcome " + user.getCommonName());
-        MainApp.scanner.nextLine(); // flush scanner
-
         String input = null;
         do
         {
             try
             {
-                PrintUtil.printColorful(pathBuilder.toString() + Constants.COMMAND_TERMINATOR);
-                input = MainApp.scanner.nextLine();
+                PrintUtil.printColorful(makeRelativePath(pathBuilder.toString()) + Constants.COMMAND_TERMINATOR);
+                input = MainApp.scanner.readLine();
                 analyzeInput(input);
 
             } catch (IOException ex)
@@ -108,12 +106,11 @@ public class Command
         if (splited.length == 2)
         {
             File file = FileUtil.getFileIfExists(pathBuilder.toString() + File.separator + splited[1]);
-            if(file!=null)
+            if (file != null)
                 Files.readAllLines(file.toPath()).forEach(System.out::println);
             else
                 System.out.println("file not found");
-        }
-        else
+        } else
             System.out.println("invalid num of arguemtns");
     }
 
@@ -127,5 +124,12 @@ public class Command
         File file = new File(pathBuilder.toString());
         if (!file.exists())
             file.mkdirs();
+    }
+
+    private String makeRelativePath(String fullPath)
+    {
+        int startIndex = fullPath.indexOf(user.getUsername());
+        String relativePath = "~" + File.separator;
+        return relativePath + fullPath.substring(startIndex);
     }
 }

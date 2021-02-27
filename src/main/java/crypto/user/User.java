@@ -1,6 +1,13 @@
 package crypto.user;
 
+import crypto.user.jsonhandler.UserJson;
+import crypto.utils.CertificateUtil;
+import crypto.utils.KeyPairUtil;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 import java.security.KeyPair;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class User
@@ -28,6 +35,16 @@ public class User
         this.commonName = commonName;
         this.x509Certificate = x509Certificate;
         this.keyPair = keyPair;
+    }
+
+    public static User loadUser(@NotNull UserJson user) throws IOException
+    {
+        String username = user.getUsername();
+        X509Certificate userCert = CertificateUtil.loadCertificate(user.getUsername());
+        String commonName = CertificateUtil.getCommonNameFromCert(userCert);
+        KeyPair userKeyPair = KeyPairUtil.loadUserKeyPair(user.getUsername());
+
+        return new User(username,commonName,userCert,userKeyPair);
     }
 
     public String getUsername()

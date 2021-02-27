@@ -57,11 +57,11 @@ public class SignUp
     }
 
     @NotNull
-    private String enterCommonName()
+    private String enterCommonName() throws IOException
     {
         PrintUtil.printColorful("Enter common name: ", PrintUtil.ANSI_YELLOW);
-        scanner.nextLine();
-        return scanner.nextLine().trim();
+//        scanner.nextLine();
+        return scanner.readLine().trim();
     }
 
     @SuppressWarnings("unchecked")
@@ -81,14 +81,14 @@ public class SignUp
                 PrintUtil.printlnColorful("Username already exist! Try again", PrintUtil.ANSI_RED);
 
             PrintUtil.printColorful("Enter username: ", PrintUtil.ANSI_YELLOW);
-            username = scanner.nextLine().trim();
+            username = scanner.readLine().trim();
             isValid = false;
         } while (username.isEmpty() || (usernameList != null && usernameList.contains(username)));
 
         return username;
     }
 
-    private String enterPassword()
+    private String enterPassword() throws IOException
     {
         String password = null;
         String confirmPassword = null;
@@ -99,9 +99,9 @@ public class SignUp
                 PrintUtil.printlnColorful("Try again!", PrintUtil.ANSI_RED);
 
             PrintUtil.printColorful("Enter password: ", PrintUtil.ANSI_YELLOW);
-            password = scanner.nextLine().trim();
+            password = scanner.readLine().trim();
             PrintUtil.printColorful("Confirm password: ", PrintUtil.ANSI_YELLOW);
-            confirmPassword = scanner.nextLine().trim();
+            confirmPassword = scanner.readLine().trim();
             isValid = false;
 
         } while (password.isEmpty() || !password.equals(confirmPassword));

@@ -111,12 +111,12 @@ public class FileHandler
      *
      * @return cypto.user content
      */
-    private String getContentFromUser()
+    private String getContentFromUser() throws IOException
     {
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
         System.out.println("enter file content and \"exit\" for saving");
-        while (!(line = MainApp.scanner.nextLine()).equals("exit"))
+        while (!(line = MainApp.scanner.readLine()).equals("exit"))
             stringBuilder.append(line).append("\n");
 
         if (!stringBuilder.isEmpty())

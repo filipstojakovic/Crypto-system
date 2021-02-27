@@ -5,8 +5,7 @@ import crypto.utils.Constants;
 import crypto.utils.HashUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -19,11 +18,20 @@ public class Test
 {
     public static void main(String[] args) throws Exception
     {
-        Security.addProvider(new BouncyCastleProvider());
-
-        testCerts();
-        //                MainApp.initDirs();
+        //        Security.addProvider(new BouncyCastleProvider());
+        //        testCerts();
         //        HashUtil.getAllHashAlgo().forEach(System.out::println);
+
+        BufferedReader scanner = new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.println("hello");
+        String test = scanner.readLine();
+
+        System.out.println("hello" + test);
+
+        test = scanner.readLine();
+
+        System.out.println("asd" + test);
 
     }
 
@@ -43,10 +51,6 @@ public class Test
         X509Certificate userCert = (X509Certificate) factory
                 .generateCertificate(new FileInputStream(Constants.CERT_DIR + "coki" + CertificateUtil.CERT_EXTENSION));
 
-        System.out.println(userCert.getNotAfter());
-        System.out.println(userCert.getSigAlgName());
-        System.out.println(userCert.getSubjectDN());
-        System.out.println(CertificateUtil.getCommonNameFromCert(userCert));
     }
 
 }

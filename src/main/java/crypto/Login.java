@@ -1,6 +1,5 @@
 package crypto;
 
-import crypto.user.LoadUser;
 import crypto.user.User;
 import crypto.user.UserChecker;
 import crypto.user.jsonhandler.UserJson;
@@ -9,25 +8,23 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.cert.CertificateException;
 
 import static crypto.MainApp.scanner;
 
 public class Login
 {
-    public void handleLogin()
+    public void handleLogin() throws ParseException, IOException, URISyntaxException
     {
-        try
+
+        Utils.clearScreen();
+        UserJson userJSON = getUserInfo();
+
+        if (userJSON != null)
         {
-            Utils.clearScreen();
-            UserJson userJSON = getUserInfo();
-            User user = new LoadUser().loadUser(userJSON);
+            User user = User.loadUser(userJSON);
             Command control = new Command(user);
             control.takeUserInputs();
-
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-
         }
     }
 
@@ -38,15 +35,14 @@ public class Login
         do
         {
             System.out.print("Enter username: ");
-            String username = scanner.next().trim();
+            String username = scanner.readLine().trim();
             System.out.print("Enter password: ");
-            String password = scanner.next().trim();
+            String password = scanner.readLine().trim();
             user = userChecker.checkUserExistence(username, password);
 
             if (user == null)
             {
                 System.out.println("Ooops! Wrong username or password!");
-                scanner.nextLine();
             }
 
         } while (user == null);

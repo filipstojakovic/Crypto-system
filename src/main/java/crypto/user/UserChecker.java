@@ -34,7 +34,7 @@ public class UserChecker
         boolean isFound = false;
         ObjectMapper objectMapper = new ObjectMapper();
 
-        for (int i = 0; i < userArray.size() && !isFound; i++)
+        for (int i = 0; i < userArray.size(); i++)
         {
             try
             {

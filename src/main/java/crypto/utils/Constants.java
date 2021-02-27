@@ -12,6 +12,7 @@ public abstract class Constants
     public static final String COMMAND_TERMINATOR = " > ";
 
     public static final String RESOURCES_DIR = Paths.get("src", "main", "resources").toString();
+
     public static final String USER_DIR = RESOURCES_DIR + File.separator + "users" + File.separator;
     public static final String PRIVATE_KEYS_DIR = RESOURCES_DIR + File.separator + "privateKey" + File.separator;
 

@@ -6,12 +6,15 @@ import crypto.utils.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.json.simple.parser.ParseException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.util.Scanner;
 
 /**
@@ -19,22 +22,24 @@ import java.util.Scanner;
  */
 public class MainApp
 {
-    public static final Scanner scanner = new Scanner(System.in);
+    public static final BufferedReader scanner = new BufferedReader(new InputStreamReader(System.in));
+    //    public static final Scanner scanner = new Scanner(System.in);
     public static final int LOGIN = 1;
     public static final int SIGNUP = 2;
     public static final int EXIT = 0;
 
     //fun start here
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
-        try
-        {
-            Security.addProvider(new BouncyCastleProvider());
 
-            initDirs();
-            CertificateUtil.initRootCertificate();
-            int command;
-            do
+        Security.addProvider(new BouncyCastleProvider());
+
+        initDirs();
+        CertificateUtil.initRootCertificate();
+        int command = -1;
+        do
+        {
+            try
             {
                 Utils.clearScreen();
                 command = loginOrSignUp();
@@ -43,24 +48,34 @@ public class MainApp
                     case LOGIN -> login();
                     case SIGNUP -> signup();
                 }
+            } catch (ParseException | URISyntaxException | NoSuchAlgorithmException | IOException  e)
+            {
+                e.printStackTrace();
+            }
 
-            } while (command != 0);
+        } while (command != 0);
 
-        } catch (ParseException | URISyntaxException | NoSuchAlgorithmException | IOException e)
-        {
-            e.printStackTrace();
-        }
 
         System.out.println("Bye bye");
     }
 
-    private static int loginOrSignUp()
+    private static int loginOrSignUp() throws IOException
     {
-        int command;
+        int command = -1;
+        String number = "";
         do
         {
             System.out.print("1)Login\n2)Sign up\n0)Exit\nCommand: ");
-            command = scanner.nextInt();
+
+            try
+            {
+                number = scanner.readLine();
+                command = Integer.parseInt(number);
+
+            } catch (NumberFormatException ex)
+            {
+
+            }
 
         } while (command < 0 || command > 2);
 
@@ -73,7 +88,7 @@ public class MainApp
         signUp.handleSignUp();
     }
 
-    private static void login()
+    private static void login() throws URISyntaxException, ParseException, IOException
     {
         Login login = new Login();
         login.handleLogin();

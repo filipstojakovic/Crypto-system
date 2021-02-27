@@ -48,11 +48,19 @@ public class CertificateUtil
         return null;
     }
 
-    public static String getCommonNameFromCert(X509Certificate cert) throws CertificateEncodingException
+    public static String getCommonNameFromCert(X509Certificate cert)
     {
-        var principal = PrincipalUtil.getSubjectX509Principal(cert);
-        var values = principal.getValues(X509Name.CN);
-        return (String) values.get(0);
+        try
+        {
+            var principal = PrincipalUtil.getSubjectX509Principal(cert);
+            var values = principal.getValues(X509Name.CN);
+            return (String) values.get(0);
+
+        } catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     private static File userCertFile(String username)
@@ -134,7 +142,7 @@ public class CertificateUtil
                     .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA).setProvider("BC").
                             build(rootPrivateKey)));// private key of signing authority , here it is signed by intermedCA
             saveCertificateToFile(endUserCert, getUserCertPath(username));
-            KeyPairUtil.savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), Constants.CERT_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION);
+            KeyPairUtil.savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), KeyPairUtil.getPrivateKeyPath(username));
 
         } catch (NoSuchProviderException | CertificateException | NoSuchAlgorithmException | OperatorCreationException | IOException ex)
         {

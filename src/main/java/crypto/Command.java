@@ -1,6 +1,7 @@
 package crypto;
 
 import crypto.user.User;
+import crypto.user.exceptions.InvalidNumOfArguemntsException;
 import crypto.utils.FileUtil;
 import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
@@ -8,6 +9,7 @@ import crypto.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class Command
 {
-
+    public static final String FILE_NOT_FOUND = "file not found";
     private User user;
     private StringBuilder pathBuilder;
 
@@ -39,22 +41,27 @@ public class Command
                 input = MainApp.scanner.readLine();
                 analyzeInput(input);
 
+            } catch (InvalidNumOfArguemntsException ex)
+            {
+                PrintUtil.printlnErrorMsg(ex.getMessage());
+
             } catch (IOException ex)
             {
-                ex.printStackTrace();
+                PrintUtil.printlnErrorMsg(FILE_NOT_FOUND);
             }
 
         } while (!"exit".equals(input));
     }
 
     //true -valid input, else invalid input
-    private void analyzeInput(String input) throws IOException
+    private void analyzeInput(String input) throws IOException, InvalidNumOfArguemntsException
     {
 
         var startWith = input.split("\\s")[0];
         if (startWith == null || startWith.isEmpty())
         {
-            System.out.println("invalid input!");
+            PrintUtil.printlnColorful("Invalid input!", PrintUtil.ANSI_RED);
+            return;
         }
 
         boolean success = false;
@@ -69,6 +76,14 @@ public class Command
                 Path path = fileHandler.createFile(input);
                 if (path != null)
                     fileHandler.insetFileContent(path);
+                break;
+
+            case "cd":
+                cdCommand(input);
+                break;
+
+            case "mkdir":
+                makeDirsCommand(input);
                 break;
 
             case "cat":
@@ -86,11 +101,21 @@ public class Command
                 if (fileList.isEmpty())
                     System.out.println("Empty folder");
                 else
-                    fileList.forEach(x -> System.out.println(x.getFileName()));
+                    fileList.forEach(x ->
+                    {
+                        if (x.toFile().isFile())
+                            System.out.println(x.getFileName().toString());
+                        else
+                            PrintUtil.printlnColorful(x.getFileName().toString(), PrintUtil.ANSI_YELLOW);
+                    });
                 break;
 
             case "clear":
                 Utils.clearScreen();
+                break;
+
+            case "help":
+                printAllCommands();
                 break;
 
             case "exit":
@@ -100,7 +125,37 @@ public class Command
 
     }
 
-    private void catCommand(String input) throws IOException
+    private void cdCommand(String input) throws IOException, InvalidNumOfArguemntsException
+    {
+        //TODO: make cd ~ and cd ..
+        if (Utils.checkForTwoArguments(input))
+        {
+            var splted = input.split(Utils.REGEX_SPACES);
+            String path = splted[1].replaceAll("\\|/", File.separator);
+            String fullPath = pathBuilder.toString() + File.separator + path;
+            if(Paths.get(fullPath).toFile().exists())
+            {
+                pathBuilder = new StringBuilder(fullPath);
+            }else
+                throw new IOException();
+        }else
+            throw new InvalidNumOfArguemntsException();
+    }
+
+    private void makeDirsCommand(String input) throws IOException
+    {
+        if (Utils.checkForTwoArguments(input))
+        {
+            var args = input.split(Utils.REGEX_SPACES);
+            Path path = Paths.get(pathBuilder.toString(), args[1]);
+            Files.createDirectories(path);
+        } else
+        {
+
+        }
+    }
+
+    private void catCommand(String input) throws IOException, InvalidNumOfArguemntsException
     {
         var splited = input.split("\\s");
         if (splited.length == 2)
@@ -109,9 +164,9 @@ public class Command
             if (file != null)
                 Files.readAllLines(file.toPath()).forEach(System.out::println);
             else
-                System.out.println("file not found");
+                System.out.println("");
         } else
-            System.out.println("invalid num of arguemtns");
+            throw new InvalidNumOfArguemntsException();
     }
 
     private StringBuilder newUserPathBuilder()
@@ -131,5 +186,17 @@ public class Command
         int startIndex = fullPath.indexOf(user.getUsername());
         String relativePath = "~" + File.separator;
         return relativePath + fullPath.substring(startIndex);
+    }
+
+    private void printAllCommands()
+    {
+        System.out.println("open - opens the file in default program");
+        System.out.println("touch - creates new file and adds content");
+        System.out.println("mkdir - create directories");
+        System.out.println("cat - print file content");
+        System.out.println("rm - delete file/folder");
+        System.out.println("ls - print current folder content");
+        System.out.println("clear - clear screen");
+        System.out.println("exit");
     }
 }

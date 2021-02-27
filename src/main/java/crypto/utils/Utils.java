@@ -41,17 +41,17 @@ public abstract class Utils
         }
     }
 
-//    public static File getFileFromResource(String fileName) throws URISyntaxException
-//    {
-//        Path resourceDirectory = Paths.get("src", "main", "resources", fileName);
-//        String path = resourceDirectory.toString();
-//        return FileUtil.createFileIfNeeded(path);
-//    }
-//
-//    public static File getFileFromResource(String fileName, String fileExtension) throws URISyntaxException, FileNotFoundException
-//    {
-//        return getFileFromResource(fileName + fileExtension);
-//    }
+    //    public static File getFileFromResource(String fileName) throws URISyntaxException
+    //    {
+    //        Path resourceDirectory = Paths.get("src", "main", "resources", fileName);
+    //        String path = resourceDirectory.toString();
+    //        return FileUtil.createFileIfNeeded(path);
+    //    }
+    //
+    //    public static File getFileFromResource(String fileName, String fileExtension) throws URISyntaxException, FileNotFoundException
+    //    {
+    //        return getFileFromResource(fileName + fileExtension);
+    //    }
 
 
     @NotNull
@@ -77,5 +77,16 @@ public abstract class Utils
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.YEAR, 1); // to get previous year add -1
         return cal.getTime();
+    }
+
+    public static boolean checkForTwoArguments(String input)
+    {
+        return checkNumberOfArguments(input, 2);
+    }
+
+    public static boolean checkNumberOfArguments(String input, int numOfArgs)
+    {
+        var args = input.split(REGEX_SPACES);
+        return (args != null && args.length == numOfArgs);
     }
 }

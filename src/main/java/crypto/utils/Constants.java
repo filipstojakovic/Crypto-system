@@ -9,6 +9,8 @@ public abstract class Constants
     public static final long YEAR_IN_MILLS = 365 * DAY_IN_MILLS;
     public static final long THIRTY_DAYS = DAY_IN_MILLS * 30;
 
+    public static final String ARG_ERROR = "invalid number of arguments";
+
     public static final String COMMAND_TERMINATOR = " > ";
 
     public static final String RESOURCES_DIR = Paths.get("src", "main", "resources").toString();

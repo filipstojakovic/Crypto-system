@@ -1,6 +1,7 @@
 package crypto;
 
 import crypto.user.User;
+import crypto.user.exceptions.InvalidNumOfArguemntsException;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -28,7 +29,7 @@ public class FileHandler
      * @param input touch fileName
      * @return true if faile create, else false
      */
-    public Path createFile(String input) throws IOException
+    public Path createFile(String input) throws IOException, InvalidNumOfArguemntsException
     {
         if (!isArguemntValid(input))
             return null;
@@ -49,7 +50,7 @@ public class FileHandler
      * @param input open fileName
      * @throws IOException
      */
-    public void openFile(String input) throws IOException
+    public void openFile(String input) throws IOException, InvalidNumOfArguemntsException
     {
         if (!isArguemntValid(input))
             return;
@@ -71,7 +72,7 @@ public class FileHandler
      * @param input rm fileName
      * @return true if file delete, false if not deleted
      */
-    public boolean removeFile(String input) throws IOException
+    public boolean removeFile(String input) throws IOException, InvalidNumOfArguemntsException
     {
         if (!isArguemntValid(input))
             return false;
@@ -131,17 +132,15 @@ public class FileHandler
     }
 
     //check if arguemnt when splited by space has lenght of 2
-    private boolean isArguemntValid(String argument)
+    private boolean isArguemntValid(String argument) throws InvalidNumOfArguemntsException
     {
         var inputSplit = argument.split(crypto.utils.Utils.REGEX_SPACES);
         if (inputSplit.length != 2)
         {
-            System.out.println("invalid number of arugemnts");
-            return false;
+            throw new InvalidNumOfArguemntsException();
         }
         return true;
     }
-
 
 
 }

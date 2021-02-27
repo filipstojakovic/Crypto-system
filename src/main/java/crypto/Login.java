@@ -3,6 +3,7 @@ package crypto;
 import crypto.user.User;
 import crypto.user.UserChecker;
 import crypto.user.jsonhandler.UserJson;
+import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
 import org.json.simple.parser.ParseException;
 
@@ -42,7 +43,7 @@ public class Login
 
             if (user == null)
             {
-                System.out.println("Ooops! Wrong username or password!");
+                PrintUtil.printlnErrorMsg("Ooops! Wrong username or password!");
             }
 
         } while (user == null);

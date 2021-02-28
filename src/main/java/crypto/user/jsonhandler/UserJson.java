@@ -3,21 +3,34 @@ package crypto.user.jsonhandler;
 //used for compairing input username and password with users in json file
 public class UserJson
 {
+    //atributi moraju imati isti naziv kao u json fajlu (case sensitive)
     private String username;
-    private String hashalg;
+    private String hashAlgo;
     private String salt;
     private String password;
+    private String symmetricAlgo;
 
     public UserJson()
     {
     }
 
-    public UserJson(String username, String hashalg, String salt, String password)
+    public UserJson(String username, String hashAlgo, String salt, String password, String symmetricAlgo)
     {
         this.username = username;
-        this.hashalg = hashalg;
+        this.hashAlgo = hashAlgo;
         this.salt = salt;
         this.password = password;
+        this.symmetricAlgo = symmetricAlgo;
+    }
+
+    public String getSymmetricAlgo()
+    {
+        return symmetricAlgo;
+    }
+
+    public void setSymmetricAlgo(String symmetricAlgo)
+    {
+        this.symmetricAlgo = symmetricAlgo;
     }
 
     public String getUsername()
@@ -30,14 +43,14 @@ public class UserJson
         this.username = username;
     }
 
-    public String getHashalg()
+    public String getHashAlgo()
     {
-        return hashalg;
+        return hashAlgo;
     }
 
-    public void setHashalg(String hashalg)
+    public void setHashAlgo(String hashAlgo)
     {
-        this.hashalg = hashalg;
+        this.hashAlgo = hashAlgo;
     }
 
     public String getSalt()

@@ -1,5 +1,7 @@
-package crypto.utils;
+package crypto.cyptoutil;
 
+import crypto.utils.Constants;
+import crypto.utils.Utils;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
@@ -18,13 +20,12 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Random;
 
-import static crypto.utils.KeyPairUtil.generateKeyPair;
+import static crypto.cyptoutil.KeyPairUtil.generateKeyPair;
 
 public class CertificateUtil
 {
@@ -33,14 +34,25 @@ public class CertificateUtil
     public static final String SHA_256_WITH_RSA = "SHA256withRSA";
 
 
-    public static X509Certificate loadCertificate(String username) throws FileNotFoundException
+    public static X509Certificate loadUserCertificate(String username) throws FileNotFoundException
     {
         try
         {
             CertificateFactory factory = CertificateFactory.getInstance(X_509);
-            X509Certificate userCert = (X509Certificate) factory.generateCertificate(new FileInputStream(userCertFile(username)));
-            return userCert;
+            return (X509Certificate) factory.generateCertificate(new FileInputStream(userCertFile(username)));
+        } catch (CertificateException ex)
+        {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 
+    public static X509Certificate loadRootCertificate() throws FileNotFoundException
+    {
+        try
+        {
+            CertificateFactory factory = CertificateFactory.getInstance(X_509);
+            return (X509Certificate) factory.generateCertificate(new FileInputStream(Constants.ROOT_CA_FILE_PATH));
         } catch (CertificateException ex)
         {
             ex.printStackTrace();
@@ -91,7 +103,7 @@ public class CertificateUtil
                 X509Certificate rootCA = new JcaX509CertificateConverter()
                         .getCertificate(builder
                                 .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA)
-                                        .setProvider("BC")
+                                        .setProvider(Constants.BC_PROVIDER)
                                         .build(rootCAKeyPair.getPrivate()))); // private key of signing authority , here it is self signed
                 saveCertificateToFile(rootCA, Constants.ROOT_CA_FILE_PATH);
                 KeyPairUtil.savePrivateKeyToFile(rootCAKeyPair.getPrivate(), Constants.ROOT_CA_PRIVATE_KEY_FILE);
@@ -137,8 +149,7 @@ public class CertificateUtil
     {
         try
         {
-            CertificateFactory factory = CertificateFactory.getInstance(X_509);
-            X509Certificate rootCA = (X509Certificate) factory.generateCertificate(new FileInputStream(Constants.ROOT_CA_FILE_PATH));
+            X509Certificate rootCA = loadRootCertificate();
             PrivateKey rootPrivateKey = KeyPairUtil.loadPrivateKey(Paths.get(Constants.ROOT_CA_PRIVATE_KEY_FILE));
 
             KeyPair endUserCertKeyPair = generateKeyPair();
@@ -154,7 +165,7 @@ public class CertificateUtil
             X509Certificate endUserCert = new JcaX509CertificateConverter()
                     .getCertificate(builder
                             .build(new JcaContentSignerBuilder(SHA_256_WITH_RSA)
-                                    .setProvider("BC").
+                                    .setProvider(Constants.BC_PROVIDER).
                                             build(rootPrivateKey)));// private key of signing authority , here it is signed by rootCA
             saveCertificateToFile(endUserCert, getUserCertPath(username));
             KeyPairUtil.savePrivateKeyToFile(endUserCertKeyPair.getPrivate(), KeyPairUtil.getPrivateKeyPath(username));

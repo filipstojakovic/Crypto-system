@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import crypto.user.jsonhandler.JsonHandler;
 import crypto.user.jsonhandler.UserJson;
-import crypto.utils.HashUtil;
+import crypto.cyptoutil.HashUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.json.simple.parser.ParseException;
@@ -56,7 +54,7 @@ public class UserChecker
 
     private boolean checkUserPassword(UserJson userJson, String inputPassword) throws NoSuchAlgorithmException
     {
-        String haxPassword = HashUtil.hashedPassword(inputPassword, userJson.getSalt(), userJson.getHashalg());
+        String haxPassword = HashUtil.hashedPassword(inputPassword, userJson.getSalt(), userJson.getHashAlgo());
         return haxPassword.equals(userJson.getPassword());
     }
 

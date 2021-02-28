@@ -1,8 +1,9 @@
-package crypto.utils;
+package crypto.cyptoutil;
 
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
+import crypto.utils.AlgorithmGrabber;
+import crypto.utils.Constants;
 
+import javax.crypto.KeyGenerator;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,6 +11,7 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.List;
 
 public class KeyPairUtil
 {
@@ -27,7 +29,7 @@ public class KeyPairUtil
 
     private static PublicKey loadUserPublicKey(String username) throws FileNotFoundException
     {
-        X509Certificate usercert = CertificateUtil.loadCertificate(username);
+        X509Certificate usercert = CertificateUtil.loadUserCertificate(username);
         return usercert.getPublicKey();
     }
 
@@ -86,5 +88,10 @@ public class KeyPairUtil
         {
             ex.printStackTrace();
         }
+    }
+
+    public static List<String> getAllSymmetricKeyAlgorithms()
+    {
+        return AlgorithmGrabber.getListOfAlgo(KeyGenerator.class);
     }
 }

@@ -19,18 +19,20 @@ import java.nio.file.Files;
 public class JsonHandler
 {
     public static final String USERNAME = "username";
-    public static final String HASH_ALG = "hashalg";
+    public static final String HASH_ALG = "hashAlgo";
     public static final String SALT = "salt";
     public static final String PASSWORD = "password";
+    public static final String SYMMETRIC_ALGO = "symmetricAlgo";
 
     //commonName NE treba ovdje, ide u certifikat
-    public static JSONObject createUserJson(String username, String hashalg, String salt, String hashedPassword)
+    public static JSONObject createUserJson(String username, String hashalg, String salt, String hashedPassword, String symmetricAlgo)
     {
         JSONObject userJson = new JSONObject();
         userJson.put(USERNAME, username);
         userJson.put(HASH_ALG, hashalg);
         userJson.put(SALT, salt);
         userJson.put(PASSWORD, hashedPassword);
+        userJson.put(SYMMETRIC_ALGO,symmetricAlgo);
 
         return userJson;
     }

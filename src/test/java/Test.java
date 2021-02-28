@@ -1,38 +1,50 @@
-import crypto.MainApp;
+import crypto.cyptoutil.DigitalEnvelope;
+import crypto.cyptoutil.KeyPairUtil;
 import crypto.user.User;
-import crypto.utils.CertificateUtil;
+import crypto.cyptoutil.CertificateUtil;
 import crypto.utils.Constants;
-import crypto.utils.HashUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.*;
-import java.security.Security;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import static crypto.MainApp.initDirs;
-import static crypto.utils.CertificateUtil.X_509;
+import static crypto.cyptoutil.CertificateUtil.X_509;
 
 public class Test
 {
     public static void main(String[] args) throws Exception
     {
-        //        Security.addProvider(new BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
         //        testCerts();
         //        HashUtil.getAllHashAlgo().forEach(System.out::println);
 
-        BufferedReader scanner = new BufferedReader(new InputStreamReader(System.in));
+        var text = "ovo je test string".getBytes(StandardCharsets.UTF_8);
+        System.out.println(new String(text));
+        System.out.println();
+        System.out.println();
+        X509Certificate rootCA = CertificateUtil.loadRootCertificate();
+        X509Certificate userCert = CertificateUtil.loadUserCertificate("fipa");
 
-        System.out.println("hello");
-        String test = scanner.readLine();
+        //TODO: sta je sa userCert
+        var enveloped = DigitalEnvelope.createKeyTransEnvelope(rootCA, text);
 
-        System.out.println("hello" + test);
+        String env = new String(enveloped);
+        System.out.println("enveloped: ");
+        System.out.println(env);
+        System.out.println();
+        System.out.println();
 
-        test = scanner.readLine();
+        PrivateKey privatekey = KeyPairUtil.loadPrivateKey(Paths.get(Constants.ROOT_CA_PRIVATE_KEY_FILE));
 
-        System.out.println("asd" + test);
-
+        var extracted = DigitalEnvelope.extractKeyTransEnvelope(privatekey, rootCA, enveloped);
+        System.out.println("extracted:");
+        System.out.println(new String(extracted));
     }
 
 

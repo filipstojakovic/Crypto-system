@@ -1,6 +1,6 @@
 package crypto;
 
-import crypto.utils.CertificateUtil;
+import crypto.cyptoutil.CertificateUtil;
 import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
@@ -15,10 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
-import java.util.Scanner;
 
 /**
  * @author Filip Stojakovic
@@ -74,8 +72,8 @@ public class MainApp
 
             try
             {
-//                number = scanner.readLine(); //TODO: uncomment this
-                number = "1";
+                number = scanner.readLine(); //TODO: uncomment this
+//                number = "1";
                 command = Integer.parseInt(number);
 
             } catch (NumberFormatException ex)

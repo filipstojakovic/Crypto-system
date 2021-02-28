@@ -1,10 +1,10 @@
 package crypto;
 
+import crypto.cyptoutil.CertificateUtil;
+import crypto.cyptoutil.HashUtil;
+import crypto.cyptoutil.KeyPairUtil;
 import crypto.user.jsonhandler.JsonHandler;
-import crypto.utils.CertificateUtil;
-import crypto.utils.HashUtil;
-import crypto.utils.PrintUtil;
-import crypto.utils.Utils;
+import crypto.utils.*;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -35,11 +34,19 @@ public class SignUp
         String hashAlg = randomHashAlg();
         String randomSalt = randomSalt();
         String hashedPassword = HashUtil.hashedPassword(password,randomSalt, hashAlg);
+        String randomSymmetricAlgo = getRandomSymmetricAlgo();
 
         CertificateUtil.generateSignedUserCert(commonName,userName); // creates Cert and private key
 
-        JSONObject userJsonObj = JsonHandler.createUserJson(userName,hashAlg,randomSalt,hashedPassword);
+        JSONObject userJsonObj = JsonHandler.createUserJson(userName,hashAlg,randomSalt,hashedPassword,randomSymmetricAlgo);
         JsonHandler.saveUserJsonToFile(userJsonObj);
+    }
+
+    private String getRandomSymmetricAlgo()
+    {
+        var symmetricAlgoList = KeyPairUtil.getAllSymmetricKeyAlgorithms();
+        int randomNum = (new SecureRandom()).nextInt(symmetricAlgoList.size());
+        return symmetricAlgoList.get(randomNum);
     }
 
     private String randomSalt()

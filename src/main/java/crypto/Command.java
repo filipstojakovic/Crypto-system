@@ -1,7 +1,7 @@
 package crypto;
 
 import crypto.user.User;
-import crypto.user.exceptions.InvalidNumOfArguemntsException;
+import crypto.exception.InvalidNumOfArguemntsException;
 import crypto.utils.FileUtil;
 import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Principal;
-import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
 public class Command

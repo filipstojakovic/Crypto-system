@@ -1,50 +1,44 @@
 package crypto.user;
 
 import crypto.user.jsonhandler.UserJson;
-import crypto.utils.CertificateUtil;
-import crypto.utils.KeyPairUtil;
+import crypto.cyptoutil.CertificateUtil;
+import crypto.cyptoutil.KeyPairUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.security.KeyPair;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class User
 {
-    //TODO: simetric key or smt
     private String username;
     private String commonName;
     private X509Certificate x509Certificate;
     private KeyPair keyPair;
+    private String symmetricAlgo;
 
     public User()
     {
     }
 
-    public User(String username, String commonName, X509Certificate x509Certificate)
-    {
-        this.username = username;
-        this.commonName = commonName;
-        this.x509Certificate = x509Certificate;
-    }
-
-    public User(String username, String commonName, X509Certificate x509Certificate, KeyPair keyPair)
+    public User(String username, String commonName, X509Certificate x509Certificate, KeyPair keyPair, String symmetricAlgo)
     {
         this.username = username;
         this.commonName = commonName;
         this.x509Certificate = x509Certificate;
         this.keyPair = keyPair;
+        this.symmetricAlgo = symmetricAlgo;
+
     }
 
-    public static User loadUser(@NotNull UserJson user) throws IOException
+    public static User loadUser(@NotNull UserJson userJson) throws IOException
     {
-        String username = user.getUsername();
-        X509Certificate userCert = CertificateUtil.loadCertificate(user.getUsername());
+        String username = userJson.getUsername();
+        X509Certificate userCert = CertificateUtil.loadUserCertificate(userJson.getUsername());
         String commonName = CertificateUtil.getCommonNameFromCert(userCert);
-        KeyPair userKeyPair = KeyPairUtil.loadUserKeyPair(user.getUsername());
+        KeyPair userKeyPair = KeyPairUtil.loadUserKeyPair(userJson.getUsername());
 
-        return new User(username,commonName,userCert,userKeyPair);
+        return new User(username, commonName, userCert, userKeyPair, userJson.getSymmetricAlgo());
     }
 
     public String getUsername()
@@ -85,5 +79,10 @@ public class User
     public void setKeyPair(KeyPair keyPair)
     {
         this.keyPair = keyPair;
+    }
+
+    public String getSymmetricAlgo()
+    {
+        return symmetricAlgo;
     }
 }

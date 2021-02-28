@@ -1,15 +1,13 @@
 package crypto;
 
 import crypto.user.User;
-import crypto.user.exceptions.InvalidNumOfArguemntsException;
+import crypto.exception.InvalidNumOfArguemntsException;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.awt.Desktop;
-import java.security.SecureRandom;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class FileHandler
 {

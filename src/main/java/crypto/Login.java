@@ -4,12 +4,10 @@ import crypto.user.User;
 import crypto.user.UserChecker;
 import crypto.user.jsonhandler.UserJson;
 import crypto.utils.PrintUtil;
-import crypto.utils.Utils;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 
@@ -32,7 +30,7 @@ public class Login
         }
     }
 
-    private static UserJson getUserInfo() throws IOException, URISyntaxException, ParseException
+    private static UserJson getUserInfo() throws IOException, ParseException
     {
         UserChecker userChecker = new UserChecker();
         UserJson user = null;

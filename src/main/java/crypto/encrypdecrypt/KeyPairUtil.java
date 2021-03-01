@@ -1,9 +1,7 @@
-package crypto.cyptoutil;
+package crypto.encrypdecrypt;
 
-import crypto.utils.AlgorithmGrabber;
 import crypto.utils.Constants;
 
-import javax.crypto.KeyGenerator;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,13 +9,14 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Arrays;
 import java.util.List;
 
 public class KeyPairUtil
 {
     public static final String RSA_ALGO = "RSA";
     public static final String PRIVATE_KEY_EXTENSION = "Private.key";
-    public static final int KEY_SIZE = 2048;
+    public static final int ASYMMETRIC_KEY_SIZE = 2048;
 
     public static KeyPair loadUserKeyPair(String username) throws IOException
     {
@@ -35,8 +34,8 @@ public class KeyPairUtil
 
     static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException
     {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA_ALGO, "BC");
-        keyPairGenerator.initialize(KEY_SIZE, new SecureRandom());
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA_ALGO, Constants.BC_PROVIDER);
+        keyPairGenerator.initialize(ASYMMETRIC_KEY_SIZE, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 
@@ -66,10 +65,7 @@ public class KeyPairUtil
             KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGO);
             PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(encodedPrivateKey);
             return keyFactory.generatePrivate(privateKeySpec);
-        } catch (NoSuchAlgorithmException e)
-        {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e)
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e)
         {
             e.printStackTrace();
         }
@@ -90,8 +86,4 @@ public class KeyPairUtil
         }
     }
 
-    public static List<String> getAllSymmetricKeyAlgorithms()
-    {
-        return AlgorithmGrabber.getListOfAlgo(KeyGenerator.class);
-    }
 }

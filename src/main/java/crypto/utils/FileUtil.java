@@ -1,7 +1,10 @@
 package crypto.utils;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.Channel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,5 +30,11 @@ public class FileUtil
         }
 
         return new File(path);
+    }
+
+    public static boolean isFileClosed(File file)
+    {
+        Path path = file.toPath();
+        return Files.isReadable(path) && Files.isWritable(path) && Files.isExecutable(path);
     }
 }

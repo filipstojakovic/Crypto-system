@@ -1,7 +1,7 @@
 package crypto.utils;
 
-import crypto.cyptoutil.CertificateUtil;
-import crypto.cyptoutil.KeyPairUtil;
+import crypto.encrypdecrypt.CertificateUtil;
+import crypto.encrypdecrypt.KeyPairUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -17,7 +17,8 @@ public abstract class Constants
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public static final String RESOURCES_DIR = Paths.get("src", "main", "resources").toString();
 
-    public static final String USER_DIR = RESOURCES_DIR + File.separator + "users" + File.separator;
+    public static final String USER_DIR_NAME = "users";
+    public static final String USER_DIR = RESOURCES_DIR + File.separator + USER_DIR_NAME + File.separator;
     public static final String PRIVATE_KEYS_DIR = RESOURCES_DIR + File.separator + "privateKey" + File.separator;
 
     public static final String ROOT_CA_DIR = RESOURCES_DIR + File.separator + "rootCA" + File.separator;

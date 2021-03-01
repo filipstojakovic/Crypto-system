@@ -1,4 +1,4 @@
-package crypto.cyptoutil;
+package crypto.encrypdecrypt;
 
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.*;
@@ -6,14 +6,12 @@ import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId;
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.jcajce.JcaAlgorithmParametersConverter;
 
 import javax.crypto.spec.OAEPParameterSpec;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Iterator;

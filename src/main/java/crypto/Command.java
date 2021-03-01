@@ -1,5 +1,6 @@
 package crypto;
 
+import crypto.exception.FileNotClosedException;
 import crypto.user.User;
 import crypto.exception.InvalidNumOfArguemntsException;
 import crypto.utils.FileUtil;
@@ -7,8 +8,11 @@ import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
 
+import javax.crypto.BadPaddingException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,10 +23,12 @@ public class Command
     public static final String FILE_NOT_FOUND = "file not found";
     private User user;
     private StringBuilder pathBuilder;
+    private CommandHandler commandHandler;
 
     public Command(User user)
     {
         this.user = user;
+        commandHandler = new CommandHandler(user);
         pathBuilder = resetUserPathBuilder();
         isUserFolderExists();
     }
@@ -40,20 +46,30 @@ public class Command
                 input = MainApp.scanner.readLine();
                 analyzeInput(input);
 
-            } catch (InvalidNumOfArguemntsException ex)
+            } catch (FileNotClosedException | InvalidNumOfArguemntsException ex)
             {
                 PrintUtil.printlnErrorMsg(ex.getMessage());
+            } catch (BadPaddingException ex)
+            {
+                PrintUtil.printlnErrorMsg("Invalid file key");
 
+            } catch (DirectoryNotEmptyException ex)
+            {
+                PrintUtil.printlnErrorMsg("Directory not empty!");
             } catch (IOException ex)
             {
                 PrintUtil.printlnErrorMsg(FILE_NOT_FOUND);
+                ex.printStackTrace();
+            } catch (Exception ex)
+            {
+                ex.printStackTrace();
             }
 
         } while (!"exit".equals(input));
     }
 
     //true -valid input, else invalid input
-    private void analyzeInput(String input) throws IOException, InvalidNumOfArguemntsException
+    private void analyzeInput(String input) throws Exception
     {
 
         var startWith = input.split("\\s")[0];
@@ -68,36 +84,33 @@ public class Command
         switch (startWith)
         {
             case "open":
-                fileHandler.openFile(input); //TODO: make tmp file that is decripted and opet that file, if saved overide original
+                commandHandler.open(input, pathBuilder.toString());
                 break;
 
             case "touch":
-                Path path = fileHandler.createFile(input);
-                if (path != null)
-                    fileHandler.insetFileContent(path);
+                commandHandler.touch(input, pathBuilder.toString());
                 break;
 
             case "cd":
-                cdCommand(input);
+                commandHandler.cd(input, pathBuilder);
                 break;
 
             case "mkdir":
             case "mkdirs":
-                makeDirsCommand(input);
+                commandHandler.mkdir(input, pathBuilder.toString());
                 break;
             //TODO: make show shared folder content
+            //TODO: upload/download file
             case "ls":
-                lsCommand();
+                commandHandler.ls(input, pathBuilder.toString());
                 break;
 
             case "cat":
-                catCommand(input);
+                commandHandler.cat(input, pathBuilder.toString());
                 break;
 
             case "rm":
-                success = fileHandler.removeFile(input);
-                if (success)
-                    System.out.println("deleted");
+                commandHandler.rm(input, pathBuilder.toString());
                 break;
 
             case "clear":
@@ -111,79 +124,8 @@ public class Command
 
             case "exit":
                 break;
-
         }
 
-    }
-
-    private void lsCommand() throws IOException
-    {
-        var fileList = Files.list(Paths.get(pathBuilder.toString())).collect(Collectors.toList());
-        if (fileList.isEmpty())
-            System.out.println("Empty folder");
-        else
-            fileList.forEach(x ->
-            {
-                if (x.toFile().isFile())
-                    System.out.println(x.getFileName().toString());
-                else
-                    PrintUtil.printlnColorful(x.getFileName().toString(), PrintUtil.ANSI_YELLOW);
-            });
-    }
-
-    private void cdCommand(String input) throws IOException, InvalidNumOfArguemntsException
-    {
-        if (Utils.checkForTwoArguments(input))
-        {
-            var splted = input.split(Utils.REGEX_SPACES);
-            String path = splted[1].replaceAll("\\|/", File.separator);
-            String fullPath = pathBuilder.toString() + File.separator + path;
-            switch (splted[1])
-            {
-                case "~":
-                    resetUserPathBuilder();
-                    break;
-                case "..":
-                    //TODO: make cd ..
-                    break;
-                default:
-
-                    if (Paths.get(fullPath).toFile().exists())
-                    {
-                        pathBuilder = new StringBuilder(fullPath);
-                    } else
-                        throw new IOException();
-            }
-
-        } else
-            throw new InvalidNumOfArguemntsException();
-    }
-
-    private void makeDirsCommand(String input) throws IOException
-    {
-        if (Utils.checkForTwoArguments(input))
-        {
-            var args = input.split(Utils.REGEX_SPACES);
-            Path path = Paths.get(pathBuilder.toString(), args[1]);
-            Files.createDirectories(path);
-        } else
-        {
-
-        }
-    }
-
-    private void catCommand(String input) throws IOException, InvalidNumOfArguemntsException
-    {
-        var splited = input.split("\\s");
-        if (splited.length == 2)
-        {
-            File file = FileUtil.getFileIfExists(pathBuilder.toString() + File.separator + splited[1]);
-            if (file != null)
-                Files.readAllLines(file.toPath()).forEach(System.out::println);
-            else
-                System.out.println("");
-        } else
-            throw new InvalidNumOfArguemntsException();
     }
 
     private StringBuilder resetUserPathBuilder()

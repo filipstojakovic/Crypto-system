@@ -1,7 +1,6 @@
-package crypto.cyptoutil;
+package crypto.encrypdecrypt.testing;
 
 import crypto.utils.Constants;
-import org.bouncycastle.asn1.cms.EnvelopedData;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.*;
@@ -23,7 +22,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import static crypto.cyptoutil.CertificateUtil.SHA_256_WITH_RSA;
+import static crypto.encrypdecrypt.CertificateUtil.SHA_256_WITH_RSA;
 
 public class SigningHandler
 {

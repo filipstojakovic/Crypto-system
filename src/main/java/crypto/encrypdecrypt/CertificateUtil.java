@@ -1,5 +1,6 @@
-package crypto.cyptoutil;
+package crypto.encrypdecrypt;
 
+import crypto.exception.NoCertificateException;
 import crypto.utils.Constants;
 import crypto.utils.Utils;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -25,7 +26,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Random;
 
-import static crypto.cyptoutil.KeyPairUtil.generateKeyPair;
+import static crypto.encrypdecrypt.KeyPairUtil.generateKeyPair;
 
 public class CertificateUtil
 {
@@ -145,11 +146,13 @@ public class CertificateUtil
         return Constants.CERT_DIR + username + CertificateUtil.CERT_EXTENSION;
     }
 
-    public static void generateSignedUserCert(String commonName, String username)
+    public static void generateSignedUserCert(String commonName, String username) throws NoCertificateException
     {
         try
         {
             X509Certificate rootCA = loadRootCertificate();
+            if(rootCA==null)
+                throw new NoCertificateException("unable to find rootCA certificate");
             PrivateKey rootPrivateKey = KeyPairUtil.loadPrivateKey(Paths.get(Constants.ROOT_CA_PRIVATE_KEY_FILE));
 
             KeyPair endUserCertKeyPair = generateKeyPair();

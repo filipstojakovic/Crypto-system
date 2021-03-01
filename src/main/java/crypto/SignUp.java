@@ -1,8 +1,9 @@
 package crypto;
 
-import crypto.cyptoutil.CertificateUtil;
-import crypto.cyptoutil.HashUtil;
-import crypto.cyptoutil.KeyPairUtil;
+import crypto.encrypdecrypt.CertificateUtil;
+import crypto.encrypdecrypt.HashUtil;
+import crypto.encrypdecrypt.SymmetricEncryption;
+import crypto.exception.NoCertificateException;
 import crypto.user.jsonhandler.JsonHandler;
 import crypto.utils.*;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public class SignUp
     public static final int MIN_SALT_SIZE = 5;
     public static final int MAX_SALT_SIZE = 15;
 
-    public void handleSignUp() throws ParseException, IOException, URISyntaxException, NoSuchAlgorithmException
+    public void handleSignUp() throws ParseException, IOException, URISyntaxException, NoSuchAlgorithmException, NoCertificateException
     {
         String commonName = enterCommonName();
         String userName = enterUserName();
@@ -44,7 +45,7 @@ public class SignUp
 
     private String getRandomSymmetricAlgo()
     {
-        var symmetricAlgoList = KeyPairUtil.getAllSymmetricKeyAlgorithms();
+        var symmetricAlgoList = SymmetricEncryption.getAllSymmetricKeyAlgorithms();
         int randomNum = (new SecureRandom()).nextInt(symmetricAlgoList.size());
         return symmetricAlgoList.get(randomNum);
     }

@@ -1,8 +1,9 @@
 package crypto.user;
 
+import crypto.encrypdecrypt.SymmetricEncryption;
 import crypto.user.jsonhandler.UserJson;
-import crypto.cyptoutil.CertificateUtil;
-import crypto.cyptoutil.KeyPairUtil;
+import crypto.encrypdecrypt.CertificateUtil;
+import crypto.encrypdecrypt.KeyPairUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ public class User
     private String commonName;
     private X509Certificate x509Certificate;
     private KeyPair keyPair;
-    private String symmetricAlgo;
+    private SymmetricEncryption symmetricEncryption;
 
     public User()
     {
@@ -27,7 +28,7 @@ public class User
         this.commonName = commonName;
         this.x509Certificate = x509Certificate;
         this.keyPair = keyPair;
-        this.symmetricAlgo = symmetricAlgo;
+        this.symmetricEncryption = new SymmetricEncryption(symmetricAlgo);
 
     }
 
@@ -81,8 +82,8 @@ public class User
         this.keyPair = keyPair;
     }
 
-    public String getSymmetricAlgo()
+    public SymmetricEncryption getSymmetricEncryption()
     {
-        return symmetricAlgo;
+        return symmetricEncryption;
     }
 }

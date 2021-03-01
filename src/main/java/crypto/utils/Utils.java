@@ -1,5 +1,6 @@
 package crypto.utils;
 
+import crypto.exception.InvalidNumOfArguemntsException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -79,14 +80,22 @@ public abstract class Utils
         return cal.getTime();
     }
 
-    public static boolean checkForTwoArguments(String input)
+    public static String replaceFileSeparator(String path)
     {
-        return checkNumberOfArguments(input, 2);
+        return path.replaceAll("\\|/",File.separator);
     }
 
-    public static boolean checkNumberOfArguments(String input, int numOfArgs)
+    public static String[] splitInputArguments(String input) throws InvalidNumOfArguemntsException
     {
-        var args = input.split(REGEX_SPACES);
-        return (args != null && args.length == numOfArgs);
+        return splitInputArguments(input, 2);
+    }
+
+    public static String[] splitInputArguments(String input, int numOfArgs) throws InvalidNumOfArguemntsException
+    {
+        var splitInput = input.split(REGEX_SPACES);
+        if (splitInput.length != numOfArgs)
+            throw new InvalidNumOfArguemntsException();
+
+        return splitInput;
     }
 }

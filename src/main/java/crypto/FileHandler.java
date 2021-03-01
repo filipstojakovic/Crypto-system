@@ -1,7 +1,11 @@
 package crypto;
 
+import crypto.encrypdecrypt.SymmetricEncryption;
+import crypto.exception.FileNotClosedException;
 import crypto.user.User;
 import crypto.exception.InvalidNumOfArguemntsException;
+import crypto.utils.FileUtil;
+import crypto.utils.PrintUtil;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -9,18 +13,27 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.awt.Desktop;
 
+import static crypto.MainApp.scanner;
+
 public class FileHandler
 {
     public static final String FILE_EXISTS = "file already exists";
     public static final String FILE_DOES_NOT_EXIST = "file does not exist";
     private User user;
     private String currentPath;
+    private SymmetricEncryption symmetricEncryption;
+
+    public FileHandler(User user)
+    {
+        this.user = user;
+        symmetricEncryption = user.getSymmetricEncryption();
+    }
 
     public FileHandler(User user, String currentPath)
     {
-
         this.user = user;
         this.currentPath = currentPath;
+        symmetricEncryption = user.getSymmetricEncryption();
     }
 
     /**
@@ -29,14 +42,13 @@ public class FileHandler
      */
     public Path createFile(String input) throws IOException, InvalidNumOfArguemntsException
     {
-        if (!isArguemntValid(input))
-            return null;
+//        if (!isArguemntValid(input))
+//            throw new InvalidNumOfArguemntsException();
 
         String path = currentPath + File.separator + input.split(crypto.utils.Utils.REGEX_SPACES)[1];
         if (isFileExists(path))
         {
-            System.out.println(FILE_EXISTS);
-            return null;
+            throw new FileNotFoundException();
         }
 
         return Files.createFile(Paths.get(path));
@@ -48,10 +60,10 @@ public class FileHandler
      * @param input open fileName
      * @throws IOException
      */
-    public void openFile(String input) throws IOException, InvalidNumOfArguemntsException
+    public void openFile(String input) throws IOException, InvalidNumOfArguemntsException, FileNotClosedException
     {
-        if (!isArguemntValid(input))
-            return;
+//        if (!isArguemntValid(input))
+//            return;
 
         String path = currentPath + File.separator + input.split(crypto.utils.Utils.REGEX_SPACES)[1];
         if (!isFileExists(path))
@@ -59,9 +71,12 @@ public class FileHandler
             System.out.println(FILE_DOES_NOT_EXIST);
             return;
         }
-
         Desktop desktop = Desktop.getDesktop();
-        desktop.open(Paths.get(path).toFile());
+        File file = Paths.get(path).toFile();
+        if(!FileUtil.isFileClosed(file))
+            throw new FileNotClosedException();
+        else
+            desktop.open(file);
     }
 
     /**
@@ -72,8 +87,8 @@ public class FileHandler
      */
     public boolean removeFile(String input) throws IOException, InvalidNumOfArguemntsException
     {
-        if (!isArguemntValid(input))
-            return false;
+//        if (!isArguemntValid(input))
+//            return false;
 
         String path = currentPath + File.separator + input.split(crypto.utils.Utils.REGEX_SPACES)[1];
         if (!isFileExists(path))
@@ -89,10 +104,14 @@ public class FileHandler
      *
      * @param path
      */
-    public void insetFileContent(Path path) throws IOException
+    public void insetFileContent(Path path) throws Exception
     {
         String content = getContentFromUser();
-        Files.write(path, content.getBytes());
+        String key = CommandHandler.getKeyFromUser();
+
+        var encrypted = symmetricEncryption.encrypt(key,content);
+
+        Files.write(path, encrypted);
     }
 
     public byte[] readAllBytes(Path path) throws IOException
@@ -110,16 +129,16 @@ public class FileHandler
      *
      * @return cypto.user content
      */
-    private String getContentFromUser() throws IOException
+    public String getContentFromUser() throws IOException
     {
         String line = null;
         StringBuilder stringBuilder = new StringBuilder();
-        System.out.println("enter file content and \"exit\" for saving");
-        while (!(line = MainApp.scanner.readLine()).equals("exit"))
+        PrintUtil.printlnColorful("enter file content and \"exit\" for saving",PrintUtil.ANSI_YELLOW);
+        while (!(line = scanner.readLine()).equals("exit"))
             stringBuilder.append(line).append("\n");
 
         if (!stringBuilder.isEmpty())
-            stringBuilder.setLength(stringBuilder.length() - 1);
+            stringBuilder.setLength(stringBuilder.length() - 1); // trim last space
         return stringBuilder.toString();
     }
 
@@ -128,17 +147,5 @@ public class FileHandler
     {
         return Files.exists(Paths.get(input));
     }
-
-    //check if arguemnt when splited by space has lenght of 2
-    private boolean isArguemntValid(String argument) throws InvalidNumOfArguemntsException
-    {
-        var inputSplit = argument.split(crypto.utils.Utils.REGEX_SPACES);
-        if (inputSplit.length != 2)
-        {
-            throw new InvalidNumOfArguemntsException();
-        }
-        return true;
-    }
-
 
 }

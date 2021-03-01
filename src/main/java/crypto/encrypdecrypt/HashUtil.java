@@ -1,4 +1,4 @@
-package crypto.cyptoutil;
+package crypto.encrypdecrypt;
 
 import crypto.utils.AlgorithmGrabber;
 import crypto.utils.Utils;
@@ -14,6 +14,8 @@ public class HashUtil
     {
         MessageDigest messageDigest = MessageDigest.getInstance(hashAlgo);
         messageDigest.reset();
+        if (salt == null)
+            salt = "";
         messageDigest.update(salt.getBytes());
         byte[] hashedInputPassword = messageDigest.digest(password.getBytes());
         return Utils.bytesToHex(hashedInputPassword);

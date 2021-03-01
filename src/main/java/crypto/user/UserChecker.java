@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import crypto.user.jsonhandler.JsonHandler;
 import crypto.user.jsonhandler.UserJson;
-import crypto.cyptoutil.HashUtil;
+import crypto.encrypdecrypt.HashUtil;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

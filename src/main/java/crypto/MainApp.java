@@ -1,6 +1,7 @@
 package crypto;
 
-import crypto.cyptoutil.CertificateUtil;
+import crypto.encrypdecrypt.CertificateUtil;
+import crypto.exception.NoCertificateException;
 import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
@@ -47,7 +48,7 @@ public class MainApp
                     case LOGIN -> login();
                     case SIGNUP -> signup();
                 }
-            }catch(CertificateNotYetValidException | CertificateExpiredException ex)
+            } catch (CertificateNotYetValidException | CertificateExpiredException | NoCertificateException ex)
             {
                 PrintUtil.printlnErrorMsg("Invalid Certificate " + ex.getMessage());
 
@@ -68,12 +69,11 @@ public class MainApp
         String number = "";
         do
         {
-            System.out.print("1)Login\n2)Sign up\n0)Exit\nCommand: ");
-
+            PrintUtil.printColorful("1)Login\n2)Sign up\n0)Exit\nNumber of command: ", PrintUtil.ANSI_WHITE);
             try
             {
-                number = scanner.readLine(); //TODO: uncomment this
-//                number = "1";
+                //                number = scanner.readLine(); //TODO: uncomment this
+                number = "1";
                 command = Integer.parseInt(number);
 
             } catch (NumberFormatException ex)
@@ -86,7 +86,7 @@ public class MainApp
         return command;
     }
 
-    private static void signup() throws ParseException, IOException, URISyntaxException, NoSuchAlgorithmException
+    private static void signup() throws ParseException, IOException, URISyntaxException, NoSuchAlgorithmException, NoCertificateException
     {
         SignUp signUp = new SignUp();
         signUp.handleSignUp();

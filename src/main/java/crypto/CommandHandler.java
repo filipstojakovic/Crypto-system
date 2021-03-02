@@ -170,14 +170,48 @@ public class CommandHandler
             throw new FileNotFoundException();
 
         var isDone = Files.deleteIfExists(path);
-        if(isDone)
+        if (isDone)
             System.out.println("Deleted");
         else
             System.out.println("Not deleted");
     }
 
-    public void cls()
+    public void users(String input) throws InvalidNumOfArguemntsException, IOException
     {
-        Utils.clearScreen();
+        var splitedInput = Utils.splitInputArguments(input, 1);
+        var fileList = Files.list(Paths.get(Constants.USER_DIR)).collect(Collectors.toList());
+        fileList.stream()
+                .filter(file -> file.toFile().isDirectory())
+                .forEach(dir -> PrintUtil.printlnColorful(dir.getFileName().toString(), PrintUtil.ANSI_YELLOW));
+    }
+
+    public void upload(String input, String currentPath) throws Exception
+    {
+        var splitedInput = Utils.splitInputArguments(input);
+        Path desktopFile = Paths.get(System.getProperty("user.home"), "Desktop", Utils.replaceFileSeparator(splitedInput[1]));
+
+        if(!Files.exists(desktopFile) || Files.isDirectory(desktopFile))
+            throw new FileNotFoundException();
+
+        String key = getKeyFromUser();
+        var encryptedData = symmetricEncryption.encrypt(key,desktopFile.toFile());
+
+        Path userFilePath = Paths.get(currentPath, desktopFile.getFileName().toString());
+        Files.write(userFilePath,encryptedData);
+    }
+
+    public void download(String input, String currentPath) throws Exception
+    {
+        var splitedInput = Utils.splitInputArguments(input);
+        String pathString = currentPath + File.separator + Utils.replaceFileSeparator(splitedInput[1]);
+        Path filePath = Paths.get(pathString);
+        if (!Files.exists(filePath) || Files.isDirectory(filePath))
+            throw new FileNotFoundException();
+
+        String key = getKeyFromUser();
+        var decrypedData = symmetricEncryption.decrtpyToString(key, filePath.toFile());
+
+        Path desktopPath = Paths.get(System.getProperty("user.home"), "Desktop", filePath.getFileName().toString());
+        Files.writeString(desktopPath, decrypedData);
     }
 }

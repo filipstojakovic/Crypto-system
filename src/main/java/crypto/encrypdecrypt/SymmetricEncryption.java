@@ -30,6 +30,12 @@ public class SymmetricEncryption
         return cipher.doFinal(data);
     }
 
+    public byte[] encrypt(String key, File datafile) throws Exception
+    {
+        return encrypt(key,Files.readAllBytes(datafile.toPath()));
+    }
+
+
     public byte[] encrypt(String key, String data) throws Exception
     {
         return encrypt(key,data.getBytes(StandardCharsets.UTF_8));

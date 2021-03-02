@@ -12,10 +12,7 @@ import javax.crypto.BadPaddingException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.stream.Collectors;
 
 public class Command
@@ -46,7 +43,7 @@ public class Command
                 input = MainApp.scanner.readLine();
                 analyzeInput(input);
 
-            } catch (FileNotClosedException | InvalidNumOfArguemntsException ex)
+            } catch (FileNotClosedException | InvalidNumOfArguemntsException | NoSuchFileException ex)
             {
                 PrintUtil.printlnErrorMsg(ex.getMessage());
             } catch (BadPaddingException ex)
@@ -100,7 +97,6 @@ public class Command
                 commandHandler.mkdir(input, pathBuilder.toString());
                 break;
             //TODO: make show shared folder content
-            //TODO: upload/download file
             case "ls":
                 commandHandler.ls(input, pathBuilder.toString());
                 break;
@@ -109,6 +105,16 @@ public class Command
                 commandHandler.cat(input, pathBuilder.toString());
                 break;
 
+            case "users":
+                commandHandler.users(input);
+                break;
+
+            case "upload":
+                commandHandler.upload(input, pathBuilder.toString());
+                break;
+            case "download":
+                commandHandler.download(input, pathBuilder.toString());
+                break;
             case "rm":
                 commandHandler.rm(input, pathBuilder.toString());
                 break;
@@ -149,12 +155,15 @@ public class Command
 
     private void printAllCommands()
     {
-        System.out.println("open - opens the file in default program");
-        System.out.println("touch - creates new file and adds content");
-        System.out.println("mkdir - create directories");
-        System.out.println("cat - print file content");
-        System.out.println("rm - delete file/folder");
+        System.out.println("open [filePath] - opens the file in default program");
+        System.out.println("touch [fileName]- creates new file and adds content");
+        System.out.println("mkdir [directoryName] - create directories");
+        System.out.println("cat [fileName] - print file content");
+        System.out.println("rm [fileName]- delete file/folder (only empty folder)");
+        System.out.println("upload [desktop fileName] - upload from desktop to users system current path");
+        System.out.println("download [fileName] - download file from users system to desktop");
         System.out.println("ls - print current folder content");
+        System.out.println("users - list all users");
         System.out.println("clear - clear screen");
         System.out.println("exit");
     }

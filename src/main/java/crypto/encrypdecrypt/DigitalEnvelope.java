@@ -39,17 +39,17 @@ public class DigitalEnvelope
     }
 
     // encryption certificate is used to identify the recipient associated with the private key
-    public static byte[] extractKeyTransEnvelope(PrivateKey receiverPrivateKey, X509Certificate encryptionCert, byte[] encEnvelopedData)
+    public static byte[] extractKeyTransEnvelope(PrivateKey recipientPrivateKey, X509Certificate recipientCert, byte[] encEnvelopedData)
             throws CMSException
     {
         CMSEnvelopedData envelopedData = new CMSEnvelopedData(encEnvelopedData);
         RecipientInformationStore recipients = envelopedData.getRecipientInfos();
-        Collection c = recipients.getRecipients(new JceKeyTransRecipientId(encryptionCert));
+        Collection c = recipients.getRecipients(new JceKeyTransRecipientId(recipientCert));
         Iterator it = c.iterator();
         if (it.hasNext())
         {
             RecipientInformation recipient = (RecipientInformation) it.next();
-            return recipient.getContent(new JceKeyTransEnvelopedRecipient(receiverPrivateKey)
+            return recipient.getContent(new JceKeyTransEnvelopedRecipient(recipientPrivateKey)
                     .setProvider(BC_PROVIDER));
         }
         throw new IllegalArgumentException("recipient for certificate not found");

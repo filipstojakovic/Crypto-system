@@ -1,0 +1,7 @@
+
+{
+
+    "digitalni_potpis": "........"
+
+    "kriptovan_sadrzaj_fajla": "......."
+}

@@ -2,20 +2,19 @@ package crypto;
 
 import crypto.user.User;
 import crypto.user.UserChecker;
-import crypto.user.jsonhandler.UserJson;
+import crypto.jsonhandler.UserJson;
 import crypto.utils.PrintUtil;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 
-import static crypto.MainApp.scanner;
-
 public class Login
 {
-    public void handleLogin() throws ParseException, IOException, URISyntaxException, CertificateNotYetValidException, CertificateExpiredException
+    public void handleLogin() throws ParseException, IOException, URISyntaxException, CertificateNotYetValidException, CertificateExpiredException, CertificateEncodingException
     {
 
         UserJson userJSON = getUserInfo();

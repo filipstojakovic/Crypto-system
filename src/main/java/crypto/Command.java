@@ -1,19 +1,18 @@
 package crypto;
 
+import crypto.exception.FileAlteredException;
 import crypto.exception.FileNotClosedException;
 import crypto.user.User;
 import crypto.exception.InvalidNumOfArguemntsException;
-import crypto.utils.FileUtil;
 import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
+import org.json.simple.parser.ParseException;
 
 import javax.crypto.BadPaddingException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.stream.Collectors;
 
 public class Command
 {
@@ -43,10 +42,14 @@ public class Command
                 input = MainApp.scanner.readLine();
                 analyzeInput(input);
 
-            } catch (FileNotClosedException | InvalidNumOfArguemntsException | NoSuchFileException ex)
+            } catch (FileNotClosedException | InvalidNumOfArguemntsException | NoSuchFileException | ParseException ex)
             {
-                PrintUtil.printlnErrorMsg(ex.getMessage());
-            } catch (BadPaddingException ex)
+                PrintUtil.printlnErrorMsg("error with file");
+            }catch(FileAlteredException | IllegalArgumentException ex)
+            {
+               PrintUtil.printlnErrorMsg(new FileAlteredException().getMessage());
+            }
+             catch (BadPaddingException ex)
             {
                 PrintUtil.printlnErrorMsg("Invalid file key");
 
@@ -56,7 +59,7 @@ public class Command
             } catch (IOException ex)
             {
                 PrintUtil.printlnErrorMsg(FILE_NOT_FOUND);
-                ex.printStackTrace();
+//                ex.printStackTrace();
             } catch (Exception ex)
             {
                 ex.printStackTrace();
@@ -77,7 +80,6 @@ public class Command
         }
 
         boolean success = false;
-        FileHandler fileHandler = new FileHandler(user, pathBuilder.toString());
         switch (startWith)
         {
             case "open":
@@ -103,6 +105,10 @@ public class Command
 
             case "cat":
                 commandHandler.cat(input, pathBuilder.toString());
+                break;
+
+            case "dog":
+                commandHandler.dog(input, pathBuilder.toString());
                 break;
 
             case "users":
@@ -158,7 +164,8 @@ public class Command
         System.out.println("open [filePath] - opens the file in default program");
         System.out.println("touch [fileName]- creates new file and adds content");
         System.out.println("mkdir [directoryName] - create directories");
-        System.out.println("cat [fileName] - print file content");
+        System.out.println("cat [fileName] - print decrypted file content");
+        System.out.println("dog [fileName] - print encrypted file content");
         System.out.println("rm [fileName]- delete file/folder (only empty folder)");
         System.out.println("upload [desktop fileName] - upload from desktop to users system current path");
         System.out.println("download [fileName] - download file from users system to desktop");

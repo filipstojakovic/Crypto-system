@@ -1,13 +1,16 @@
 package crypto.encrypdecrypt;
 
 import crypto.exception.NoCertificateException;
+import crypto.exception.NotSignWithRootCAException;
 import crypto.utils.Constants;
 import crypto.utils.Utils;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -21,9 +24,9 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static crypto.encrypdecrypt.KeyPairUtil.generateKeyPair;
@@ -61,19 +64,18 @@ public class CertificateUtil
         return null;
     }
 
-    public static String getCommonNameFromCert(X509Certificate cert)
+    public static String getCommonNameFromCert(X509Certificate cert) throws CertificateEncodingException
     {
-        try
-        {
-            var principal = PrincipalUtil.getSubjectX509Principal(cert);
-            var values = principal.getValues(X509Name.CN);
-            return (String) values.get(0);
+        var principal = PrincipalUtil.getSubjectX509Principal(cert);
+        var values = principal.getValues(X509Name.CN);
+        return (String) values.get(0);
+    }
 
-        } catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-        return null;
+    public static String getCertIssuer(X509Certificate cert) throws CertificateEncodingException
+    {
+        var principal = PrincipalUtil.getIssuerX509Principal(cert);
+        var values = principal.getValues(X509Name.CN);
+        return (String) values.get(0);
     }
 
     private static File userCertFile(String username)
@@ -135,12 +137,6 @@ public class CertificateUtil
         return principal.getName();
     }
 
-    public static String getIssuerDn(X509Certificate x509cert)
-    {
-        Principal principal = x509cert.getIssuerDN();
-        return principal.getName();
-    }
-
     public static String getUserCertPath(String username)
     {
         return Constants.CERT_DIR + username + CertificateUtil.CERT_EXTENSION;
@@ -151,7 +147,7 @@ public class CertificateUtil
         try
         {
             X509Certificate rootCA = loadRootCertificate();
-            if(rootCA==null)
+            if (rootCA == null)
                 throw new NoCertificateException("unable to find rootCA certificate");
             PrivateKey rootPrivateKey = KeyPairUtil.loadPrivateKey(Paths.get(Constants.ROOT_CA_PRIVATE_KEY_FILE));
 
@@ -177,5 +173,13 @@ public class CertificateUtil
         {
             ex.printStackTrace();
         }
+    }
+
+    public static void isCertValid(X509Certificate cert) throws CertificateException, NotSignWithRootCAException
+    {
+        cert.checkValidity();
+        String issuer = getCertIssuer(cert);
+        if (!"rootCA".equals(issuer))
+            throw new NotSignWithRootCAException();
     }
 }

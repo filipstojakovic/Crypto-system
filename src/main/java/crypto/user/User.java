@@ -1,13 +1,14 @@
 package crypto.user;
 
 import crypto.encrypdecrypt.SymmetricEncryption;
-import crypto.user.jsonhandler.UserJson;
+import crypto.jsonhandler.UserJson;
 import crypto.encrypdecrypt.CertificateUtil;
 import crypto.encrypdecrypt.KeyPairUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 public class User
@@ -17,34 +18,10 @@ public class User
     private X509Certificate x509Certificate;
     private KeyPair keyPair;
     private SymmetricEncryption symmetricEncryption;
+    private String hashAlgo;
 
     public User()
     {
-    }
-
-    public User(String username, String commonName, X509Certificate x509Certificate, KeyPair keyPair, String symmetricAlgo)
-    {
-        this.username = username;
-        this.commonName = commonName;
-        this.x509Certificate = x509Certificate;
-        this.keyPair = keyPair;
-        this.symmetricEncryption = new SymmetricEncryption(symmetricAlgo);
-
-    }
-
-    public static User loadUser(@NotNull UserJson userJson) throws IOException
-    {
-        String username = userJson.getUsername();
-        X509Certificate userCert = CertificateUtil.loadUserCertificate(userJson.getUsername());
-        String commonName = CertificateUtil.getCommonNameFromCert(userCert);
-        KeyPair userKeyPair = KeyPairUtil.loadUserKeyPair(userJson.getUsername());
-
-        return new User(username, commonName, userCert, userKeyPair, userJson.getSymmetricAlgo());
-    }
-
-    public String getUsername()
-    {
-        return username;
     }
 
     public void setUsername(String username)
@@ -52,14 +29,41 @@ public class User
         this.username = username;
     }
 
+    public void setHashAlgo(String hashAlgo)
+    {
+        this.hashAlgo = hashAlgo;
+    }
+
+    private User(String username, String hashAlgo, String commonName, X509Certificate x509Certificate, KeyPair keyPair, String symmetricAlgo)
+    {
+        this.username = username;
+        this.hashAlgo = hashAlgo;
+        this.commonName = commonName;
+        this.x509Certificate = x509Certificate;
+        this.keyPair = keyPair;
+        this.symmetricEncryption = new SymmetricEncryption(symmetricAlgo);
+
+    }
+
+    public static User loadUser(@NotNull UserJson userJson) throws IOException, CertificateEncodingException
+    {
+        String username = userJson.getUsername();
+        String hashAlgo = userJson.getHashAlgo();
+        X509Certificate userCert = CertificateUtil.loadUserCertificate(userJson.getUsername());
+        String commonName = CertificateUtil.getCommonNameFromCert(userCert);
+        KeyPair userKeyPair = KeyPairUtil.loadUserKeyPair(userJson.getUsername());
+
+        return new User(username,hashAlgo, commonName, userCert, userKeyPair, userJson.getSymmetricAlgo());
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
     public String getCommonName()
     {
         return commonName;
-    }
-
-    public void setCommonName(String commonName)
-    {
-        this.commonName = commonName;
     }
 
     public X509Certificate getX509Certificate()
@@ -67,23 +71,18 @@ public class User
         return x509Certificate;
     }
 
-    public void setX509Certificate(X509Certificate x509Certificate)
-    {
-        this.x509Certificate = x509Certificate;
-    }
-
     public KeyPair getKeyPair()
     {
         return keyPair;
     }
 
-    public void setKeyPair(KeyPair keyPair)
-    {
-        this.keyPair = keyPair;
-    }
-
     public SymmetricEncryption getSymmetricEncryption()
     {
         return symmetricEncryption;
+    }
+
+    public String getHashAlgo()
+    {
+        return hashAlgo;
     }
 }

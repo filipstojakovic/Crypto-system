@@ -1,6 +1,5 @@
-package crypto.user.jsonhandler;
+package crypto.jsonhandler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import crypto.utils.Constants;
 import crypto.utils.FileUtil;
 import crypto.utils.Utils;
@@ -13,8 +12,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
 
 public class JsonHandler
 {
@@ -42,8 +39,7 @@ public class JsonHandler
         JSONArray jsonArray = getUsersJsonArray();
         jsonArray.add(userJsonObj);
 
-        ObjectMapper mapper = new ObjectMapper();
-        String prittfyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonArray);
+        String prittfyJson = Utils.prittyJson(jsonArray);
 
         try(FileWriter fileWriter = new FileWriter(Constants.USERS_JSON_PATH))
         {

@@ -1,4 +1,4 @@
-package crypto.user.jsonhandler;
+package crypto.jsonhandler;
 
 //used for compairing input username and password with users in json file
 public class UserJson

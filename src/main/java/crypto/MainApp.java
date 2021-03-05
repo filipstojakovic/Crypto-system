@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 
@@ -52,7 +53,7 @@ public class MainApp
             {
                 PrintUtil.printlnErrorMsg("Invalid Certificate " + ex.getMessage());
 
-            } catch (ParseException | URISyntaxException | NoSuchAlgorithmException | IOException e)
+            } catch (ParseException | URISyntaxException | NoSuchAlgorithmException | IOException | CertificateEncodingException e)
             {
                 e.printStackTrace();
             }
@@ -92,7 +93,7 @@ public class MainApp
         signUp.handleSignUp();
     }
 
-    private static void login() throws URISyntaxException, ParseException, IOException, CertificateNotYetValidException, CertificateExpiredException
+    private static void login() throws URISyntaxException, ParseException, IOException, CertificateNotYetValidException, CertificateExpiredException, CertificateEncodingException
     {
         Login login = new Login();
         login.handleLogin();

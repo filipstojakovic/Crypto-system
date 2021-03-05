@@ -4,7 +4,7 @@ import crypto.encrypdecrypt.CertificateUtil;
 import crypto.encrypdecrypt.HashUtil;
 import crypto.encrypdecrypt.SymmetricEncryption;
 import crypto.exception.NoCertificateException;
-import crypto.user.jsonhandler.JsonHandler;
+import crypto.jsonhandler.JsonHandler;
 import crypto.utils.*;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;

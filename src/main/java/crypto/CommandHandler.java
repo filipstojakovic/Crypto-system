@@ -1,22 +1,26 @@
 package crypto;
 
-import crypto.encrypdecrypt.SymmetricEncryption;
+import crypto.encrypdecrypt.*;
+import crypto.exception.FileAlteredException;
 import crypto.exception.InvalidNumOfArguemntsException;
+import crypto.jsonhandler.JsonSignatureHandler;
 import crypto.user.User;
 import crypto.utils.Constants;
 import crypto.utils.FileUtil;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
 import org.apache.commons.io.FileUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
 import static crypto.MainApp.scanner;
@@ -25,13 +29,13 @@ public class CommandHandler
 {
     private final User user;
     private final SymmetricEncryption symmetricEncryption;
-    private final FileHandler fileHandler;
+    private final JsonSignatureHandler signatureHandler;
 
     public CommandHandler(User user)
     {
         this.user = user;
         symmetricEncryption = user.getSymmetricEncryption();
-        fileHandler = new FileHandler(user);
+        signatureHandler = new JsonSignatureHandler(user);
     }
 
     public void mkdir(String input, String currentPath) throws InvalidNumOfArguemntsException, IOException
@@ -76,13 +80,18 @@ public class CommandHandler
     public void touch(String input, String currentPath) throws Exception
     {
         var splitInput = Utils.splitInputArguments(input);
+
+        X509Certificate userCert = user.getX509Certificate();
+        CertificateUtil.isCertValid(userCert);
+
         String pathString = currentPath + File.separator + Utils.replaceFileSeparator(splitInput[1]);
         Files.createFile(Paths.get(pathString));
 
-        String content = fileHandler.getContentFromUser();
+        String content = getContentFromUser();
         String key = getKeyFromUser();
-        var encryptedData = symmetricEncryption.encrypt(key, content);
-        Files.write(Paths.get(pathString), encryptedData);
+
+        var json = signatureHandler.createSignatureWithEncryptedContent(content.getBytes(StandardCharsets.UTF_8), key, KeyPairUtil.loadUserPublicKey(userCert));
+        Files.writeString(Paths.get(pathString), Utils.prittyJson(json));
     }
 
     public void open(String input, String currentPath) throws Exception
@@ -93,13 +102,16 @@ public class CommandHandler
         if (Files.isDirectory(orginalPath) || !Files.exists(orginalPath))
             throw new FileNotFoundException();
 
+        var jsonFile = signatureHandler.loadFileContent(orginalPath);
+        String symmetricKey = CommandHandler.getKeyFromUser();
+        if (signatureHandler.verifySignature(jsonFile, symmetricKey, user.getKeyPair().getPrivate()))
+            throw new FileAlteredException();
+
         Path copyPath = copyFilePath(originalPathString, orginalPath);
         FileUtils.copyFile(orginalPath.toFile(), copyPath.toFile());
 
-        String key = getKeyFromUser();
-        String content = symmetricEncryption.decrtpyToString(key, copyPath.toFile());
-
-        Files.writeString(copyPath, content);
+        var content = symmetricEncryption.decrypt(symmetricKey, signatureHandler.getContentFromJSON(jsonFile));
+        Files.write(copyPath, content);
         Desktop.getDesktop().open(copyPath.toFile());   //open copy file
 
         PrintUtil.printColorful("Save file content? (Y\\N): ", PrintUtil.ANSI_GREEN);
@@ -107,20 +119,19 @@ public class CommandHandler
         if ("y".equals(userInput) || "yes".equals(userInput))
         {
             var data = Files.readAllBytes(copyPath);
-            var encrypedData = symmetricEncryption.encrypt(key, data);
-            Files.write(orginalPath, encrypedData);
+            var jsonSignature = signatureHandler.createSignatureWithEncryptedContent(data,symmetricKey,user.getKeyPair().getPublic());
+            Files.writeString(orginalPath, Utils.prittyJson(jsonSignature));
         }
         Files.delete(copyPath);
     }
 
-    static String getKeyFromUser() throws IOException
+    public static String getKeyFromUser() throws IOException
     {
         PrintUtil.printColorful("Please enter file key: ", PrintUtil.ANSI_YELLOW);
         return scanner.readLine().trim();
     }
 
-    @NotNull
-    private Path copyFilePath(String pathString, Path path) throws IOException
+    private Path copyFilePath(String pathString, Path path)
     {
         String originalFileName = path.getFileName().toString();
         String copyFileName = "copy_" + originalFileName;
@@ -153,10 +164,26 @@ public class CommandHandler
         File file = FileUtil.getFileIfExists(currentPath + File.separator + Utils.replaceFileSeparator(splitedInput[1]));
         if (file != null && !file.isDirectory())
         {
-            var encryptedData = Files.readAllBytes(file.toPath());
+            var jsonFile = signatureHandler.loadFileContent(file.toPath());
+            CertificateUtil.isCertValid(user.getX509Certificate());
             String key = CommandHandler.getKeyFromUser();
-            var decryptedData = symmetricEncryption.decrypt(key, encryptedData);
+            if(signatureHandler.verifySignature(jsonFile,key,user.getKeyPair().getPrivate()))
+                throw new FileAlteredException();
+
+            var decryptedData = symmetricEncryption.decrypt(key, signatureHandler.getContentFromJSON(jsonFile));
             System.out.println(new String(decryptedData));
+        } else
+            throw new FileNotFoundException();
+    }
+
+    public void dog(String input, String currentPath) throws InvalidNumOfArguemntsException, IOException
+    {
+        var splitedInput = Utils.splitInputArguments(input);
+        File file = FileUtil.getFileIfExists(currentPath + File.separator + Utils.replaceFileSeparator(splitedInput[1]));
+        if (file != null && !file.isDirectory())
+        {
+            var fileContent = Files.readAllBytes(file.toPath());
+            System.out.println(new String(fileContent));
         } else
             throw new FileNotFoundException();
     }
@@ -190,14 +217,16 @@ public class CommandHandler
         var splitedInput = Utils.splitInputArguments(input);
         Path desktopFile = Paths.get(System.getProperty("user.home"), "Desktop", Utils.replaceFileSeparator(splitedInput[1]));
 
-        if(!Files.exists(desktopFile) || Files.isDirectory(desktopFile))
+        if (!Files.exists(desktopFile) || Files.isDirectory(desktopFile))
             throw new FileNotFoundException();
 
+        CertificateUtil.isCertValid(user.getX509Certificate());
         String key = getKeyFromUser();
-        var encryptedData = symmetricEncryption.encrypt(key,desktopFile.toFile());
+        var fileContent = Files.readAllBytes(desktopFile);
+        var jsonFile = signatureHandler.createSignatureWithEncryptedContent(fileContent,key,user.getKeyPair().getPublic());
 
         Path userFilePath = Paths.get(currentPath, desktopFile.getFileName().toString());
-        Files.write(userFilePath,encryptedData);
+        Files.writeString(userFilePath, Utils.prittyJson(jsonFile));
     }
 
     public void download(String input, String currentPath) throws Exception
@@ -208,10 +237,35 @@ public class CommandHandler
         if (!Files.exists(filePath) || Files.isDirectory(filePath))
             throw new FileNotFoundException();
 
+        CertificateUtil.isCertValid(user.getX509Certificate());
         String key = getKeyFromUser();
-        var decrypedData = symmetricEncryption.decrtpyToString(key, filePath.toFile());
+        var jsonFile = signatureHandler.loadFileContent(filePath);
+
+        if(signatureHandler.verifySignature(jsonFile,key,user.getKeyPair().getPrivate()))
+            throw new FileAlteredException();
+
+        var decrypedData = symmetricEncryption.decrtpyToString(key, signatureHandler.getContentFromJSON(jsonFile));
 
         Path desktopPath = Paths.get(System.getProperty("user.home"), "Desktop", filePath.getFileName().toString());
         Files.writeString(desktopPath, decrypedData);
     }
+
+    /**
+     * get content from cypto.user until he enters "exit"
+     *
+     * @return cypto.user content
+     */
+    private String getContentFromUser() throws IOException
+    {
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        PrintUtil.printlnColorful("enter file content and \"exit\" for saving", PrintUtil.ANSI_YELLOW);
+        while (!(line = scanner.readLine()).equals("exit"))
+            stringBuilder.append(line).append("\n");
+
+        if (!stringBuilder.isEmpty())
+            stringBuilder.setLength(stringBuilder.length() - 1); // trim last space
+        return stringBuilder.toString();
+    }
+
 }

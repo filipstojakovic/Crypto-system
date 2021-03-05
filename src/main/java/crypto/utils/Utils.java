@@ -1,13 +1,13 @@
 package crypto.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import crypto.exception.InvalidNumOfArguemntsException;
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
@@ -97,5 +97,30 @@ public abstract class Utils
             throw new InvalidNumOfArguemntsException();
 
         return splitInput;
+    }
+
+    public static byte[] byteStringToByteArray(String byteString)
+    {
+        byte[] array = new byte[byteString.length()];
+        for (int i = 0; i < byteString.length(); i++)
+        {
+            char c = byteString.charAt(i);
+            array[i] = (byte)c;
+        }
+        return array;
+    }
+
+    public static String prittyJson(JSONArray jsonArray) throws JsonProcessingException
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        String prittfyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonArray);
+        return prittfyJson;
+    }
+
+    public static String prittyJson(JSONObject jsonObject) throws JsonProcessingException
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        String prittfyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+        return prittfyJson;
     }
 }

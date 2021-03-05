@@ -25,4 +25,11 @@ public class HashUtil
     {
         return AlgorithmGrabber.getListOfAlgo(MessageDigest.class);
     }
+
+    public static String createHash(byte[] content, String hashAlgo) throws NoSuchAlgorithmException
+    {
+        MessageDigest messageDigest = MessageDigest.getInstance(hashAlgo);
+        messageDigest.reset();
+        return Utils.bytesToHex(messageDigest.digest(content));
+    }
 }

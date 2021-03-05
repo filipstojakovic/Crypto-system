@@ -1,5 +1,6 @@
 package crypto.encrypdecrypt;
 
+import crypto.user.User;
 import crypto.utils.Constants;
 
 import java.io.*;
@@ -39,7 +40,7 @@ public class KeyPairUtil
         return keyPairGenerator.generateKeyPair();
     }
 
-    private static PublicKey loadUserPublicKey(X509Certificate usercert)
+    public static PublicKey loadUserPublicKey(X509Certificate usercert)
     {
         return usercert.getPublicKey();
     }
@@ -53,6 +54,16 @@ public class KeyPairUtil
     {
         Path path = Paths.get(getPrivateKeyPath(username));
         return loadPrivateKey(path);
+    }
+
+    public static PrivateKey loadPrivateKey(String username) throws IOException
+    {
+        return loadPrivateKey(Paths.get(Constants.PRIVATE_KEYS_DIR + username + KeyPairUtil.PRIVATE_KEY_EXTENSION));
+    }
+
+    public static PrivateKey loadPrivateKey(User user) throws IOException
+    {
+        return loadPrivateKey(Paths.get(Constants.PRIVATE_KEYS_DIR + user.getUsername() + KeyPairUtil.PRIVATE_KEY_EXTENSION));
     }
 
     public static PrivateKey loadPrivateKey(Path path) throws IOException // maybe add algorithm for KeyFactory.getInstance

@@ -1,8 +1,11 @@
 package crypto;
 
-import crypto.encrypdecrypt.*;
+import crypto.encrypdecrypt.CertificateUtil;
+import crypto.encrypdecrypt.KeyPairUtil;
+import crypto.encrypdecrypt.SymmetricEncryption;
 import crypto.exception.FileAlteredException;
 import crypto.exception.InvalidNumOfArguemntsException;
+import crypto.exception.NoUserException;
 import crypto.jsonhandler.JsonSignatureHandler;
 import crypto.user.User;
 import crypto.utils.Constants;
@@ -10,8 +13,10 @@ import crypto.utils.FileUtil;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
 import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
@@ -104,7 +108,7 @@ public class CommandHandler
 
         var jsonFile = signatureHandler.loadFileContent(orginalPath);
         String symmetricKey = CommandHandler.getKeyFromUser();
-        if (signatureHandler.verifySignature(jsonFile, symmetricKey, user.getKeyPair().getPrivate()))
+        if (signatureHandler.isSignatureAltered(jsonFile, symmetricKey, user.getKeyPair().getPrivate()))
             throw new FileAlteredException();
 
         Path copyPath = copyFilePath(originalPathString, orginalPath);
@@ -119,7 +123,7 @@ public class CommandHandler
         if ("y".equals(userInput) || "yes".equals(userInput))
         {
             var data = Files.readAllBytes(copyPath);
-            var jsonSignature = signatureHandler.createSignatureWithEncryptedContent(data,symmetricKey,user.getKeyPair().getPublic());
+            var jsonSignature = signatureHandler.createSignatureWithEncryptedContent(data, symmetricKey, user.getKeyPair().getPublic());
             Files.writeString(orginalPath, Utils.prittyJson(jsonSignature));
         }
         Files.delete(copyPath);
@@ -167,7 +171,7 @@ public class CommandHandler
             var jsonFile = signatureHandler.loadFileContent(file.toPath());
             CertificateUtil.isCertValid(user.getX509Certificate());
             String key = CommandHandler.getKeyFromUser();
-            if(signatureHandler.verifySignature(jsonFile,key,user.getKeyPair().getPrivate()))
+            if (signatureHandler.isSignatureAltered(jsonFile, key, user.getKeyPair().getPrivate()))
                 throw new FileAlteredException();
 
             var decryptedData = symmetricEncryption.decrypt(key, signatureHandler.getContentFromJSON(jsonFile));
@@ -203,13 +207,23 @@ public class CommandHandler
             System.out.println("Not deleted");
     }
 
-    public void users(String input) throws InvalidNumOfArguemntsException, IOException
+    public List<String> users(String input) throws InvalidNumOfArguemntsException, IOException
     {
         var splitedInput = Utils.splitInputArguments(input, 1);
+        List<String> userList = getAllUsers();
+        userList.forEach(dir -> PrintUtil.printlnColorful(dir, PrintUtil.ANSI_YELLOW));
+        return userList;
+    }
+
+    @NotNull
+    private List<String> getAllUsers() throws IOException
+    {
         var fileList = Files.list(Paths.get(Constants.USER_DIR)).collect(Collectors.toList());
-        fileList.stream()
+        var userList = fileList.stream()
                 .filter(file -> file.toFile().isDirectory())
-                .forEach(dir -> PrintUtil.printlnColorful(dir.getFileName().toString(), PrintUtil.ANSI_YELLOW));
+                .map(file -> file.getFileName().toString())
+                .collect(Collectors.toList());
+        return userList;
     }
 
     public void upload(String input, String currentPath) throws Exception
@@ -223,7 +237,7 @@ public class CommandHandler
         CertificateUtil.isCertValid(user.getX509Certificate());
         String key = getKeyFromUser();
         var fileContent = Files.readAllBytes(desktopFile);
-        var jsonFile = signatureHandler.createSignatureWithEncryptedContent(fileContent,key,user.getKeyPair().getPublic());
+        var jsonFile = signatureHandler.createSignatureWithEncryptedContent(fileContent, key, user.getKeyPair().getPublic());
 
         Path userFilePath = Paths.get(currentPath, desktopFile.getFileName().toString());
         Files.writeString(userFilePath, Utils.prittyJson(jsonFile));
@@ -239,9 +253,10 @@ public class CommandHandler
 
         CertificateUtil.isCertValid(user.getX509Certificate());
         String key = getKeyFromUser();
+
         var jsonFile = signatureHandler.loadFileContent(filePath);
 
-        if(signatureHandler.verifySignature(jsonFile,key,user.getKeyPair().getPrivate()))
+        if (signatureHandler.isSignatureAltered(jsonFile, key, user.getKeyPair().getPrivate()))
             throw new FileAlteredException();
 
         var decrypedData = symmetricEncryption.decrtpyToString(key, signatureHandler.getContentFromJSON(jsonFile));
@@ -268,4 +283,36 @@ public class CommandHandler
         return stringBuilder.toString();
     }
 
+    public void shareWith(String input, String currentPath) throws Exception
+    {
+        var splitedInput = Utils.splitInputArguments(input, 3);
+
+        var filePath = currentPath + File.separator + Utils.replaceFileSeparator(splitedInput[1]);
+        Path path = Paths.get(filePath);
+        if(!Files.exists(path))
+            throw new FileNotFoundException();
+
+        var shareUsername = splitedInput[2];
+        var userList = getAllUsers();
+        if(userList.isEmpty() || !userList.contains(shareUsername))
+            throw new NoUserException();
+
+        CertificateUtil.isCertValid(user.getX509Certificate());
+        var shareUserCert = CertificateUtil.loadUserCertificate(shareUsername);
+        CertificateUtil.isCertValid(shareUserCert);
+
+        var fileContent = validateAndExtactContent(path);
+
+        var fileName = path.getFileName().toString();
+
+    }
+
+    private byte[] validateAndExtactContent(Path path) throws Exception
+    {
+        var jsonFile = signatureHandler.loadFileContent(path);
+        String key = getKeyFromUser();
+        if(signatureHandler.isSignatureAltered(jsonFile,key,user.getKeyPair().getPrivate()))
+            throw new FileAlteredException();
+        return symmetricEncryption.decrypt(key,signatureHandler.getContentFromJSON(jsonFile));
+    }
 }

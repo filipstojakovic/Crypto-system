@@ -8,4 +8,9 @@ public class NotSignWithRootCAException extends Exception
     {
         super(MSG);
     }
+
+    public NotSignWithRootCAException(String username)
+    {
+        super(username +" " +MSG);
+    }
 }

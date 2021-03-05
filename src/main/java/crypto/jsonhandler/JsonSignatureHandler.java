@@ -48,7 +48,7 @@ public class JsonSignatureHandler
         return jsonObject;
     }
 
-    public boolean verifySignature(JSONObject jsonFile,String symmetricKey, Key aKey) throws Exception
+    public boolean isSignatureAltered(JSONObject jsonFile, String symmetricKey, Key aKey) throws Exception
     {
         var fileSignature = getSignatureFromJSON(jsonFile);
         var fileSignatureHash = AsymmetricEncryption.decryptWithKey(fileSignature, aKey);

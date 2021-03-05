@@ -180,6 +180,6 @@ public class CertificateUtil
         cert.checkValidity();
         String issuer = getCertIssuer(cert);
         if (!"rootCA".equals(issuer))
-            throw new NotSignWithRootCAException();
+            throw new NotSignWithRootCAException(getSubjectDn(cert));
     }
 }

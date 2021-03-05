@@ -2,6 +2,7 @@ package crypto;
 
 import crypto.exception.FileAlteredException;
 import crypto.exception.FileNotClosedException;
+import crypto.exception.NotSignWithRootCAException;
 import crypto.user.User;
 import crypto.exception.InvalidNumOfArguemntsException;
 import crypto.utils.Constants;
@@ -45,7 +46,10 @@ public class Command
             } catch (FileNotClosedException | InvalidNumOfArguemntsException | NoSuchFileException | ParseException ex)
             {
                 PrintUtil.printlnErrorMsg("error with file");
-            }catch(FileAlteredException | IllegalArgumentException ex)
+            }catch(NotSignWithRootCAException ex)
+            {
+                PrintUtil.printlnErrorMsg(ex.getMessage());
+            } catch(FileAlteredException | IllegalArgumentException ex)
             {
                PrintUtil.printlnErrorMsg(new FileAlteredException().getMessage());
             }
@@ -80,7 +84,7 @@ public class Command
         }
 
         boolean success = false;
-        switch (startWith)
+        switch (startWith.toLowerCase())
         {
             case "open":
                 commandHandler.open(input, pathBuilder.toString());
@@ -98,7 +102,6 @@ public class Command
             case "mkdirs":
                 commandHandler.mkdir(input, pathBuilder.toString());
                 break;
-            //TODO: make show shared folder content
             case "ls":
                 commandHandler.ls(input, pathBuilder.toString());
                 break;
@@ -113,6 +116,10 @@ public class Command
 
             case "users":
                 commandHandler.users(input);
+                break;
+            //TODO: make show shared folder content
+            case "sharewith":
+                commandHandler.shareWith(input,pathBuilder.toString());
                 break;
 
             case "upload":
@@ -171,6 +178,7 @@ public class Command
         System.out.println("download [fileName] - download file from users system to desktop");
         System.out.println("ls - print current folder content");
         System.out.println("users - list all users");
+        System.out.println("sharewith [fileName] [username] - share file with user");
         System.out.println("clear - clear screen");
         System.out.println("exit");
     }

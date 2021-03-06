@@ -41,19 +41,19 @@ public class Command
             {
                 PrintUtil.printColorful(makeRelativePath(pathBuilder.toString()) + Constants.COMMAND_TERMINATOR);
                 input = MainApp.scanner.readLine();
+                //                if(!"exit".equals(input.toLowerCase().trim()))
                 analyzeInput(input);
 
-            } catch (FileNotClosedException | InvalidNumOfArguemntsException | NoSuchFileException | ParseException ex)
+            } catch (FileNotClosedException | NoSuchFileException | ParseException ex)
             {
                 PrintUtil.printlnErrorMsg("error with file");
-            }catch(NotSignWithRootCAException ex)
+            } catch (InvalidNumOfArguemntsException | NotSignWithRootCAException ex)
             {
                 PrintUtil.printlnErrorMsg(ex.getMessage());
-            } catch(FileAlteredException | IllegalArgumentException ex)
+            } catch (FileAlteredException | IllegalArgumentException ex)
             {
-               PrintUtil.printlnErrorMsg(new FileAlteredException().getMessage());
-            }
-             catch (BadPaddingException ex)
+                PrintUtil.printlnErrorMsg(new FileAlteredException().getMessage());
+            } catch (BadPaddingException ex)
             {
                 PrintUtil.printlnErrorMsg("Invalid file key");
 
@@ -63,13 +63,13 @@ public class Command
             } catch (IOException ex)
             {
                 PrintUtil.printlnErrorMsg(FILE_NOT_FOUND);
-//                ex.printStackTrace();
+                //                ex.printStackTrace();
             } catch (Exception ex)
             {
                 ex.printStackTrace();
             }
 
-        } while (!"exit".equals(input));
+        } while (!"exit".equalsIgnoreCase(input.trim()));
     }
 
     //true -valid input, else invalid input
@@ -117,11 +117,18 @@ public class Command
             case "users":
                 commandHandler.users(input);
                 break;
-            //TODO: make show shared folder content
-            case "sharewith":
-                commandHandler.shareWith(input,pathBuilder.toString());
+            case "share":
+            case "shares":
+                commandHandler.printShareFolder(input);
                 break;
-
+            case "sharefilewith":
+                commandHandler.shareFileWith(input, pathBuilder.toString());
+                break;
+            case "opensharedfile":
+            case "openshare":
+            case "openshared":
+                commandHandler.openSharedFile(input);
+                break;
             case "upload":
                 commandHandler.upload(input, pathBuilder.toString());
                 break;
@@ -143,6 +150,8 @@ public class Command
 
             case "exit":
                 break;
+            default:
+                PrintUtil.printlnErrorMsg("Invalid input");
         }
 
     }
@@ -177,8 +186,10 @@ public class Command
         System.out.println("upload [desktop fileName] - upload from desktop to users system current path");
         System.out.println("download [fileName] - download file from users system to desktop");
         System.out.println("ls - print current folder content");
+        System.out.println("share - print shared folder content");
         System.out.println("users - list all users");
-        System.out.println("sharewith [fileName] [username] - share file with user");
+        System.out.println("sharefilewith [fileName] [username] - share file with existing user");
+        System.out.println("openSharedFile [fileName] - print shared file content");
         System.out.println("clear - clear screen");
         System.out.println("exit");
     }

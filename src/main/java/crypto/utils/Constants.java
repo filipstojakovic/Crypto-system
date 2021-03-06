@@ -21,6 +21,9 @@ public abstract class Constants
     public static final String USER_DIR = RESOURCES_DIR + File.separator + USER_DIR_NAME + File.separator;
     public static final String PRIVATE_KEYS_DIR = RESOURCES_DIR + File.separator + "privateKey" + File.separator;
 
+    public static final String SHARE_DIR_NAME = "shared";
+    public static final String SHARE_DIR = RESOURCES_DIR + File.separator + SHARE_DIR_NAME + File.separator;
+
     public static final String ROOT_CA_DIR = RESOURCES_DIR + File.separator + "rootCA" + File.separator;
     public static final String ROOT_CA_FILE_PATH = ROOT_CA_DIR + "rootCA" + CertificateUtil.CERT_EXTENSION;
     public static final String ROOT_CA_PRIVATE_KEY_FILE = ROOT_CA_DIR + "rootCA" + KeyPairUtil.PRIVATE_KEY_EXTENSION;

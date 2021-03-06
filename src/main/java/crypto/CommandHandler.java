@@ -14,6 +14,7 @@ import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
+import org.json.simple.parser.ParseException;
 
 import java.awt.*;
 import java.util.List;
@@ -143,8 +144,12 @@ public class CommandHandler
     public void ls(String input, String currentPath) throws InvalidNumOfArguemntsException, IOException
     {
         var splitedInput = Utils.splitInputArguments(input, 1); //var not used, just checking num of arguments
+        printFolderContent(Paths.get(currentPath));
+    }
 
-        var fileList = Files.list(Paths.get(currentPath)).collect(Collectors.toList());
+    private void printFolderContent(Path currentPath) throws IOException
+    {
+        var fileList = Files.list(currentPath).collect(Collectors.toList());
         if (fileList.isEmpty())
             System.out.println("Empty folder");
         else
@@ -155,7 +160,6 @@ public class CommandHandler
                 else
                     PrintUtil.printlnColorful(x.getFileName().toString(), PrintUtil.ANSI_YELLOW);
             });
-
     }
 
     public void cat(String input, String currentPath) throws Exception
@@ -270,18 +274,18 @@ public class CommandHandler
         return stringBuilder.toString();
     }
 
-    public void shareWith(String input, String currentPath) throws Exception
+    public void shareFileWith(String input, String currentPath) throws Exception
     {
         var splitedInput = Utils.splitInputArguments(input, 3);
 
         var filePath = currentPath + File.separator + Utils.replaceFileSeparator(splitedInput[1]);
         Path path = Paths.get(filePath);
-        if(!Files.exists(path))
+        if (!Files.exists(path))
             throw new FileNotFoundException();
 
         var shareUsername = splitedInput[2];
         var userList = getAllUsers();
-        if(userList.isEmpty() || !userList.contains(shareUsername))
+        if (userList.isEmpty() || !userList.contains(shareUsername))
             throw new NoUserException();
 
         CertificateUtil.isCertValid(user.getX509Certificate());
@@ -290,16 +294,35 @@ public class CommandHandler
 
         var fileContent = validateAndExtactContent(path);
         var fileName = path.getFileName().toString();
-        //todo share this content
-        //json add Who Shares What with Whom
+
+        var jsonSharedFile = signatureHandler.createSharedSignature(fileContent, shareUsername, shareUserCert);
+
+        Path sharePath = Paths.get(Constants.SHARE_DIR, fileName);
+        Files.writeString(sharePath, Utils.prittyJson(jsonSharedFile));
     }
 
     private byte[] validateAndExtactContent(Path path) throws Exception
     {
         var jsonFile = signatureHandler.loadFileContent(path);
         String key = getKeyFromUser();
-        if(signatureHandler.isSignatureAltered(jsonFile,key,user.getKeyPair().getPrivate()))
+        if (signatureHandler.isSignatureAltered(jsonFile, key, user.getKeyPair().getPrivate()))
             throw new FileAlteredException();
-        return symmetricEncryption.decrypt(key,signatureHandler.getContentFromJSON(jsonFile));
+        return symmetricEncryption.decrypt(key, signatureHandler.getContentFromJSON(jsonFile));
+    }
+
+    public void openSharedFile(String input) throws InvalidNumOfArguemntsException, IOException, ParseException
+    {
+        //TODO: cat shared file
+        var splitInput = Utils.splitInputArguments(input);
+        var json = signatureHandler.loadFileContent(Paths.get(Constants.SHARE_DIR + splitInput[1]));
+
+        //read json test bouth certs, test hashes, happy
+        System.out.println(json);
+    }
+
+    public void printShareFolder(String input) throws InvalidNumOfArguemntsException, IOException
+    {
+        var splitInput = Utils.splitInputArguments(input,1);
+        printFolderContent(Paths.get(Constants.SHARE_DIR));
     }
 }

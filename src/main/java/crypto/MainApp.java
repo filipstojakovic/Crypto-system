@@ -105,5 +105,6 @@ public class MainApp
         Files.createDirectories(Paths.get(Constants.PRIVATE_KEYS_DIR));
         Files.createDirectories(Paths.get(Constants.USER_DIR));
         Files.createDirectories(Paths.get(Constants.ROOT_CA_DIR));
+        Files.createDirectories(Paths.get(Constants.SHARE_DIR));
     }
 }

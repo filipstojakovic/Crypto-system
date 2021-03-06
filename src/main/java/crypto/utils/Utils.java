@@ -120,7 +120,6 @@ public abstract class Utils
     public static String prittyJson(JSONObject jsonObject) throws JsonProcessingException
     {
         ObjectMapper mapper = new ObjectMapper();
-        String prittfyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-        return prittfyJson;
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
     }
 }

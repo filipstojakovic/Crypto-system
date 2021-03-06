@@ -13,6 +13,8 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
@@ -41,6 +43,8 @@ public class SignUp
 
         JSONObject userJsonObj = JsonHandler.createUserJson(userName,hashAlg,randomSalt,hashedPassword,randomSymmetricAlgo);
         JsonHandler.saveUserJsonToFile(userJsonObj);
+
+        Files.createDirectory(Paths.get(Constants.USER_DIR, userName));
     }
 
     private String getRandomSymmetricAlgo()

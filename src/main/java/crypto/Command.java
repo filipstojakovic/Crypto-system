@@ -44,7 +44,7 @@ public class Command
             } catch (FileNotClosedException | NoSuchFileException | ParseException ex)
             {
                 PrintUtil.printlnErrorMsg("error with file");
-            } catch (InvalidNumOfArguemntsException | NotSignWithRootCAException | NotForYouException ex)
+            } catch (InvalidNumOfArguemntsException | NoUserException | NotSignWithRootCAException | NotForYouException ex)
             {
                 PrintUtil.printlnErrorMsg(ex.getMessage());
             } catch (FileAlteredException | IllegalArgumentException ex)

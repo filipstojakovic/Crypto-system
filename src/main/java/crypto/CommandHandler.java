@@ -251,7 +251,6 @@ public class CommandHandler
             throw new FileNotFoundException();
 
         CertificateUtil.isCertValid(user.getX509Certificate());
-        String key = getKeyFromUser();
 
         var decrypedData = validateAndExtactContent(filePath);
 

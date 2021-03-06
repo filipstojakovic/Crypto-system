@@ -70,7 +70,7 @@ public class MainApp
         String number = "";
         do
         {
-            PrintUtil.printColorful("1)Login\n2)Sign up\n0)Exit\nNumber of command: ", PrintUtil.ANSI_WHITE);
+            System.out.print("1)Login\n2)Sign up\n0)Exit\nNumber of command: ");
             try
             {
                 number = scanner.readLine();

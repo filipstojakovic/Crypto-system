@@ -23,10 +23,10 @@ public class Test
         //        testingAllSymetricAlgo(originalContent);
 //        asymmetrictest();
 
-        String text = "ovo je neki test";
-
+        String text = "\n";
+        System.out.println(text.getBytes(StandardCharsets.UTF_8));
         var base64 = Base64.getEncoder().encode(text.getBytes(StandardCharsets.UTF_8));
-
+        System.out.println(base64);
         System.out.println(new String(base64));
 
 

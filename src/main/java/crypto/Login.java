@@ -12,6 +12,8 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 
+import static crypto.MainApp.scanner;
+
 public class Login
 {
     public void handleLogin() throws ParseException, IOException, URISyntaxException, CertificateNotYetValidException, CertificateExpiredException, CertificateEncodingException
@@ -35,13 +37,10 @@ public class Login
         UserJson user = null;
         do
         {
-//            System.out.print("Enter username: ");
-//            String username = scanner.readLine().trim();
-//            System.out.print("Enter password: ");
-//            String password = scanner.readLine().trim();
-
-            String username = "fipa"; //TODO: uncomment above
-            String password = "stoja";
+            System.out.print("Enter username: ");
+            String username = scanner.readLine().trim();
+            System.out.print("Enter password: ");
+            String password = scanner.readLine().trim();
 
             user = userChecker.checkUserExistence(username, password);
 

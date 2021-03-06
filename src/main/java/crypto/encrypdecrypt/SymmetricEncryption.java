@@ -1,14 +1,17 @@
 package crypto.encrypdecrypt;
 
 import crypto.utils.Constants;
+import crypto.utils.Utils;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class SymmetricEncryption
 {
@@ -31,9 +34,16 @@ public class SymmetricEncryption
 
     public byte[] encrypt(String key, byte[] data, String symmetricAlgo) throws Exception
     {
-        SecretKey secretKey = generateSecretKey(key);
+        SecretKey secretKey = generateSecretKey(key, symmetricAlgo);
         Cipher cipher = Cipher.getInstance(symmetricAlgo);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        return cipher.doFinal(data);
+    }
+
+    public byte[] encrypt(SecretKey key, byte[] data, String symmetricAlgo) throws Exception
+    {
+        Cipher cipher = Cipher.getInstance(symmetricAlgo);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(data);
     }
 
@@ -49,12 +59,24 @@ public class SymmetricEncryption
         return encrypt(key, data.getBytes(StandardCharsets.UTF_8));
     }
 
-    public byte[] decrypt(String key, byte[] cryptedData) throws Exception
+    public byte[] decrypt(String key, byte[] cryptedData, String symmetricAlgo) throws Exception
     {
-        SecretKey secretKey = generateSecretKey(key);
+        SecretKey secretKey = generateSecretKey(key, symmetricAlgo);
         Cipher cipher = Cipher.getInstance(symmetricAlgo, Constants.BC_PROVIDER);
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
         return cipher.doFinal(cryptedData);
+    }
+
+    public byte[] decrypt(SecretKey key, byte[] cryptedData, String symmetricAlgo) throws Exception
+    {
+        Cipher cipher = Cipher.getInstance(symmetricAlgo, Constants.BC_PROVIDER);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        return cipher.doFinal(cryptedData);
+    }
+
+    public byte[] decrypt(String key, byte[] cryptedData) throws Exception
+    {
+        return decrypt(key, cryptedData, this.symmetricAlgo);
     }
 
     public String decrtpyToString(String key, byte[] cryptedData) throws Exception
@@ -69,34 +91,27 @@ public class SymmetricEncryption
         return decrtpyToString(key, cyptedData);
     }
 
-    public static SecretKey generateRandomAESkey()
+    public static String generateRandomAESkey()
     {
-        KeyGenerator generator;
-        try
-        {
-            generator = KeyGenerator.getInstance(AES);
-            generator.init(KEY_SIZE);
-            return generator.generateKey();
-
-        } catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-        return null;
+        Random random = new SecureRandom();
+        byte[] key = new byte[KEY_LENGHT];
+        random.nextBytes(key);
+        return Utils.bytesToHex(key);
     }
 
-    public SecretKey generateSecretKey(String key)
+    public SecretKey generateSecretKey(String key, String symmetricAlgo)
     {
         //        if (key == null)
         //            key = "";
         StringBuilder password = new StringBuilder(key);
+
         while (password.length() < KEY_LENGHT)
             password.append(PADDING);
 
         if (password.length() > 16)
             password = new StringBuilder(password.substring(0, KEY_LENGHT));
 
-        return new SecretKeySpec(password.toString().getBytes(StandardCharsets.UTF_8), symmetricAlgo);
+        return new SecretKeySpec(password.toString().getBytes(), symmetricAlgo);
     }
 
     public String getSymmetricAlgo()

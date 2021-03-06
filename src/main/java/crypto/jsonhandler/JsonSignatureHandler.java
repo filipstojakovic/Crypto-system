@@ -5,11 +5,13 @@ import crypto.encrypdecrypt.HashUtil;
 import crypto.encrypdecrypt.SymmetricEncryption;
 import crypto.user.User;
 import crypto.utils.Utils;
+import org.bouncycastle.jcajce.provider.symmetric.AES;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -58,31 +60,29 @@ public class JsonSignatureHandler
         return jsonObject;
     }
 
-
-    public JSONObject createSignatureWithEncryptedContent(byte[] content, String symmetricKey, String symmetricAlgo, Key key) throws Exception
+    public JSONObject createSignatureWithEncryptedContent(byte[] content, String symmetricKey, Key key) throws Exception
     {
         return createSignatureWithEncryptedContent(content, symmetricKey, symmEncription.getSymmetricAlgo(), user.getHashAlgo(), key);
     }
 
-    public JSONObject createSignatureWithEncryptedContent(byte[] content, String symmetricKey, Key key) throws Exception
-    {
-        return createSignatureWithEncryptedContent(content, symmetricKey, symmEncription.getSymmetricAlgo(), key);
-    }
-
-    public boolean isSignatureAltered(JSONObject jsonFile, String symmetricKey, Key aKey) throws Exception
+    public boolean isSignatureAltered(JSONObject jsonFile, String symmAlgo, String symmetricKey, String hashAlgo, Key aKey) throws Exception
     {
         var fileSignature = getSignatureFromJSON(jsonFile);
         var fileSignatureHash = AsymmetricEncryption.decryptWithKey(fileSignature, aKey);
         var signatureHash = new String(fileSignatureHash);
 
         var encryptedFileContent = getContentFromJSON(jsonFile);
-        var decryptedFileContent = symmEncription.decrypt(symmetricKey, encryptedFileContent);
-        var contentHash = HashUtil.createHash(decryptedFileContent, user.getHashAlgo());
+        var decryptedFileContent = symmEncription.decrypt(symmetricKey, encryptedFileContent, symmAlgo);
+        var contentHash = HashUtil.createHash(decryptedFileContent, hashAlgo);
         return !signatureHash.equals(contentHash);
-
     }
 
-    public JSONObject loadFileContent(Path path) throws IOException, ParseException
+    public boolean isSignatureAltered(JSONObject jsonFile, String symmetricKey, Key aKey) throws Exception
+    {
+        return isSignatureAltered(jsonFile, symmEncription.getSymmetricAlgo(), symmetricKey, user.getHashAlgo(), aKey);
+    }
+
+    public JSONObject loadJsonFileContent(Path path) throws IOException, ParseException
     {
         if (!Files.exists(path))
             throw new FileNotFoundException();
@@ -101,14 +101,11 @@ public class JsonSignatureHandler
 
     public JSONObject createSharedSignature(byte[] fileContent, String shareUsername, X509Certificate shareUserCert) throws Exception
     {
-        SecretKey symmetricSecretKey = SymmetricEncryption.generateRandomAESkey();
-        if (symmetricSecretKey == null)
-            throw new Exception();
-        String symmetricKey = new String(symmetricSecretKey.getEncoded());
-        var jsonSygnature = createSignatureWithEncryptedContent(fileContent, symmetricKey, SHARE_HASH_ALGO, user.getKeyPair().getPrivate());
+        String symmetricSecretKey = SymmetricEncryption.generateRandomAESkey();
+        var jsonSygnature = createSignatureWithEncryptedContent(fileContent, symmetricSecretKey, "AES", SHARE_HASH_ALGO, user.getKeyPair().getPrivate());
 
-        var envelope = AsymmetricEncryption.encryptWithKey(symmetricKey.getBytes(StandardCharsets.UTF_8), shareUserCert.getPublicKey());
-        var envelopeBase64 = Base64.getEncoder().encode(envelope);
+        var envelope = AsymmetricEncryption.encryptWithKey(symmetricSecretKey.getBytes(StandardCharsets.UTF_8), shareUserCert.getPublicKey());
+        var envelopeBase64 = Base64.getEncoder().encodeToString(envelope);
 
         JSONObject jsonSharedFile = new JSONObject();
         jsonSharedFile.put(SENDER, user.getUsername());
@@ -129,5 +126,32 @@ public class JsonSignatureHandler
     {
         var base64Sinagure = (String) fileJson.get(SIGNATURE);
         return Base64.getDecoder().decode(base64Sinagure);
+    }
+
+    public byte[] getEnvelope(JSONObject jsonObject)
+    {
+        var envelopeBase64 = (String) jsonObject.get(ENVELOPE);
+        return Base64.getDecoder().decode(envelopeBase64);
+    }
+
+    public String getSender(JSONObject jsonObject)
+    {
+        return (String) jsonObject.get(SENDER);
+    }
+
+    public String getReciever(JSONObject jsonObject)
+    {
+        return (String) jsonObject.get(RECIEVER);
+    }
+
+    public JSONObject getShareContentJson(JSONObject jsonObject)
+    {
+        return (JSONObject) jsonObject.get(SHARE_CONTENT);
+    }
+
+    public byte[] extractDecryptedSymmKey(JSONObject jsonObject, X509Certificate shareUserCert) throws Exception
+    {
+        var envelope = getEnvelope(jsonObject);
+        return AsymmetricEncryption.decryptWithKey(envelope, user.getKeyPair().getPrivate());
     }
 }

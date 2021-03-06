@@ -1,10 +1,7 @@
 package crypto;
 
-import crypto.exception.FileAlteredException;
-import crypto.exception.FileNotClosedException;
-import crypto.exception.NotSignWithRootCAException;
+import crypto.exception.*;
 import crypto.user.User;
-import crypto.exception.InvalidNumOfArguemntsException;
 import crypto.utils.Constants;
 import crypto.utils.PrintUtil;
 import crypto.utils.Utils;
@@ -47,7 +44,7 @@ public class Command
             } catch (FileNotClosedException | NoSuchFileException | ParseException ex)
             {
                 PrintUtil.printlnErrorMsg("error with file");
-            } catch (InvalidNumOfArguemntsException | NotSignWithRootCAException ex)
+            } catch (InvalidNumOfArguemntsException | NotSignWithRootCAException | NotForYouException ex)
             {
                 PrintUtil.printlnErrorMsg(ex.getMessage());
             } catch (FileAlteredException | IllegalArgumentException ex)

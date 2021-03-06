@@ -73,8 +73,7 @@ public class MainApp
             PrintUtil.printColorful("1)Login\n2)Sign up\n0)Exit\nNumber of command: ", PrintUtil.ANSI_WHITE);
             try
             {
-                //                number = scanner.readLine(); //TODO: uncomment this
-                number = "1";
+                number = scanner.readLine();
                 command = Integer.parseInt(number);
 
             } catch (NumberFormatException ex)

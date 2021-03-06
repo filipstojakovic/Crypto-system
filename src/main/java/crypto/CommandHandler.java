@@ -1,11 +1,10 @@
 package crypto;
 
 import crypto.encrypdecrypt.CertificateUtil;
+import crypto.encrypdecrypt.HashUtil;
 import crypto.encrypdecrypt.KeyPairUtil;
 import crypto.encrypdecrypt.SymmetricEncryption;
-import crypto.exception.FileAlteredException;
-import crypto.exception.InvalidNumOfArguemntsException;
-import crypto.exception.NoUserException;
+import crypto.exception.*;
 import crypto.jsonhandler.JsonSignatureHandler;
 import crypto.user.User;
 import crypto.utils.Constants;
@@ -17,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import org.json.simple.parser.ParseException;
 
 import java.awt.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,6 +30,8 @@ import java.security.cert.X509Certificate;
 import java.util.stream.Collectors;
 
 import static crypto.MainApp.scanner;
+import static crypto.encrypdecrypt.SymmetricEncryption.AES;
+import static crypto.jsonhandler.JsonSignatureHandler.*;
 
 public class CommandHandler
 {
@@ -168,7 +171,7 @@ public class CommandHandler
         File file = FileUtil.getFileIfExists(currentPath + File.separator + Utils.replaceFileSeparator(splitedInput[1]));
         if (file != null && !file.isDirectory())
         {
-            var jsonFile = signatureHandler.loadFileContent(file.toPath());
+            var jsonFile = signatureHandler.loadJsonFileContent(file.toPath());
             CertificateUtil.isCertValid(user.getX509Certificate());
             var decryptedData = validateAndExtactContent(file.toPath());
             System.out.println(new String(decryptedData));
@@ -288,9 +291,7 @@ public class CommandHandler
         if (userList.isEmpty() || !userList.contains(shareUsername))
             throw new NoUserException();
 
-        CertificateUtil.isCertValid(user.getX509Certificate());
-        var shareUserCert = CertificateUtil.loadUserCertificate(shareUsername);
-        CertificateUtil.isCertValid(shareUserCert);
+        X509Certificate shareUserCert = validateBothCerts(shareUsername);
 
         var fileContent = validateAndExtactContent(path);
         var fileName = path.getFileName().toString();
@@ -298,31 +299,53 @@ public class CommandHandler
         var jsonSharedFile = signatureHandler.createSharedSignature(fileContent, shareUsername, shareUserCert);
 
         Path sharePath = Paths.get(Constants.SHARE_DIR, fileName);
-        Files.writeString(sharePath, Utils.prittyJson(jsonSharedFile));
+        Files.writeString(sharePath, jsonSharedFile.toString());
+    }
+
+    @NotNull
+    private X509Certificate validateBothCerts(String shareUsername) throws CertificateException, NotSignWithRootCAException, FileNotFoundException
+    {
+        CertificateUtil.isCertValid(user.getX509Certificate());
+        var shareUserCert = CertificateUtil.loadUserCertificate(shareUsername);
+        CertificateUtil.isCertValid(shareUserCert);
+        return shareUserCert;
     }
 
     private byte[] validateAndExtactContent(Path path) throws Exception
     {
-        var jsonFile = signatureHandler.loadFileContent(path);
+        var jsonFile = signatureHandler.loadJsonFileContent(path);
         String key = getKeyFromUser();
         if (signatureHandler.isSignatureAltered(jsonFile, key, user.getKeyPair().getPrivate()))
             throw new FileAlteredException();
         return symmetricEncryption.decrypt(key, signatureHandler.getContentFromJSON(jsonFile));
     }
 
-    public void openSharedFile(String input) throws InvalidNumOfArguemntsException, IOException, ParseException
+    public void openSharedFile(String input) throws Exception
     {
-        //TODO: cat shared file
         var splitInput = Utils.splitInputArguments(input);
-        var json = signatureHandler.loadFileContent(Paths.get(Constants.SHARE_DIR + splitInput[1]));
+        var sharedJson = signatureHandler.loadJsonFileContent(Paths.get(Constants.SHARE_DIR + splitInput[1]));
 
-        //read json test bouth certs, test hashes, happy
-        System.out.println(json);
+        String sender = signatureHandler.getSender(sharedJson);
+        String reciver = signatureHandler.getReciever(sharedJson);
+
+        if (!user.getUsername().equals(reciver))
+            throw new NotForYouException();
+
+        var shareUserCert = validateBothCerts(sender);
+        var decryptedSymmKey = signatureHandler.extractDecryptedSymmKey(sharedJson, shareUserCert);
+        var shareSignatureAndContent = signatureHandler.getShareContentJson(sharedJson);
+
+        if (signatureHandler.isSignatureAltered(shareSignatureAndContent, AES, new String(decryptedSymmKey), SHARE_HASH_ALGO, shareUserCert.getPublicKey()))
+            throw new FileAlteredException();
+
+        var shareEncryptedContent = signatureHandler.getContentFromJSON(shareSignatureAndContent);
+        var data = symmetricEncryption.decrypt(new String(decryptedSymmKey), shareEncryptedContent, AES);
+        System.out.println(new String(data));
     }
 
     public void printShareFolder(String input) throws InvalidNumOfArguemntsException, IOException
     {
-        var splitInput = Utils.splitInputArguments(input,1);
+        var splitInput = Utils.splitInputArguments(input, 1);
         printFolderContent(Paths.get(Constants.SHARE_DIR));
     }
 }

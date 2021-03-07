@@ -298,7 +298,7 @@ public class CommandHandler
         var jsonSharedFile = signatureHandler.createSharedSignature(fileContent, shareUsername, shareUserCert);
 
         Path sharePath = Paths.get(Constants.SHARE_DIR, fileName);
-        Files.writeString(sharePath, jsonSharedFile.toString());
+        Files.writeString(sharePath, Utils.prittyJson(jsonSharedFile));
     }
 
     @NotNull

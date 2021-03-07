@@ -1,5 +1,6 @@
 package crypto.encrypdecrypt;
 
+import jdk.jfr.Name;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
@@ -18,6 +19,7 @@ import java.util.Iterator;
 
 import static crypto.utils.Constants.BC_PROVIDER;
 
+@Name("this class was not used. but it could be very usefull")
 public class DigitalEnvelope
 {
     public static byte[] createKeyTransEnvelope(X509Certificate recipeintCert, byte[] data)
